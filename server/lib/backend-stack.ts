@@ -6,12 +6,8 @@ import * as ec2 from 'aws-cdk-lib/aws-ec2';
 export class BackendStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
-
-    // The code that defines your stack goes here
-
-    //Create VPC with CIDR 10.0.0.0/16 and 2 subnets, one public and one private
+    //Create VPC with CIDR 10.0.0.0/16 and 4 subnets, two public and two private
     const vpc = this.createVpc();
-
     //Create 3 RDS Aurora Postgres clusters with version 15.2 using the vpc and each with 2 reader instances
     //and 1 writer instance
     this.createRdsClusters(vpc);
@@ -86,16 +82,16 @@ export class BackendStack extends cdk.Stack {
   private createVpc() {
     return new ec2.Vpc(this, 'Vpc', {
       ipAddresses: ec2.IpAddresses.cidr('10.0.0.0/16'),
-      maxAzs: 1,
+      maxAzs: 2,
       subnetConfiguration: [
         {
           cidrMask: 24,
-          name: 'public',
+          name: 'public01',
           subnetType: ec2.SubnetType.PUBLIC,
         },
         {
           cidrMask: 24,
-          name: 'private',
+          name: 'private01',
           subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
         },
       ],
