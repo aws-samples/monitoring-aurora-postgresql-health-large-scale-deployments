@@ -1,12 +1,13 @@
 version: 1
 applications:
-- backend:
+- appRoot: amplifyapp
+  backend:
     phases:
       build:
         commands:
         - '# Execute Amplify CLI with the helper script'
         - amplifyPush --simple
-- frontend:
+  frontend:
     phases:
       preBuild:
         commands:
@@ -21,4 +22,4 @@ applications:
     cache:
       paths:
       - node_modules/**/*
-appRoot: amplifyapp
+
