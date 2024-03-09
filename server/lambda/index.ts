@@ -1,9 +1,9 @@
-//Write a function that reads cloudwatch metric with  Namespace='AWS/RDS', MetricName='BufferCacheHitRatio', Dimensions=[{'Name': 'DBInstanceIdentifier', 'Value': db_instance_id}]
 import { CloudWatch } from '@aws-sdk/client-cloudwatch';
 import { DynamoDB } from '@aws-sdk/client-dynamodb';
 import { RDS } from '@aws-sdk/client-rds';
+import { EventBridgeHandler, EventBridgeEvent, Context, Callback } from 'aws-lambda';
 
-export const getCloudWatchMetric = async (cloudwatch: CloudWatch, db_instance_id: string, startTime: Date, endTime: Date) => {
+const getCloudWatchMetric = async (cloudwatch: CloudWatch, db_instance_id: string, startTime: Date, endTime: Date) => {
     const data = await cloudwatch.getMetricStatistics({
         Namespace: 'AWS/RDS',
         MetricName: 'BufferCacheHitRatio',
@@ -71,11 +71,10 @@ const iterateLogs = async () => {
     }
 }
 
-
-export const insertIntoDynamoDb = async (instanceId: string, average: string, startTimeFormatted: string) => {
+const insertIntoDynamoDb = async (instanceId: string, average: string, startTimeFormatted: string) => {
     const dynamodb = new DynamoDB();
     const putResult = dynamodb.putItem({
-        TableName: 'BufferCacheHitRatioMetrics',
+        TableName: process.env.DYNAMODB_TABLE_NAME,
         Item: {
             'InstanceId': { S: instanceId },
             'MetricValueAverage': { N: average },
@@ -83,4 +82,10 @@ export const insertIntoDynamoDb = async (instanceId: string, average: string, st
         }
     });
     return true;
+}
+
+export const iterateLogsOnASchedule: EventBridgeHandler<"Dynamo Entry", any, void> = async (event: EventBridgeEvent<any, any>) => {
+    console.log(event);
+    console.log("Iterating logs");
+    await iterateLogs();
 }

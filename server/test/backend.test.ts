@@ -41,13 +41,25 @@ test('4 subnets are created in different AZ', () => {
             'Fn::Select': [
                 0,
                 {
-                    'Fn::GetAZss': ''
+                    'Fn::GetAZs': ''
                 }
             ]
         }
     });
 });
 
+
+//Write a test for createLambda lambda
+test('lambda is created', () => {
+    const app = new cdk.App();
+    // WHEN
+    const stack = new Backend.BackendStack(app, 'MyTestStack');
+    // THEN
+    const template = Template.fromStack(stack);
+    template.hasResourceProperties('AWS::Lambda::Function',
+        { FunctionName: 'BufferCacheHitRatioLambda' }
+    );
+});
 
 
 //Write a test for 3 Aurora Postgres created and validate number of instances created

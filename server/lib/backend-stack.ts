@@ -2,6 +2,7 @@ import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as rds from 'aws-cdk-lib/aws-rds';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
+import * as lambda from 'aws-cdk-lib/aws-lambda';
 
 export class BackendStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -11,7 +12,20 @@ export class BackendStack extends cdk.Stack {
     //Create 3 RDS Aurora Postgres clusters with version 15.2 using the vpc and each with 2 reader instances
     //and 1 writer instance
     this.createRdsClusters(vpc);
-    this.createDynamoDb();
+    const tableName = this.createDynamoDb();
+    this.createLambda(tableName);
+  }
+
+  private createLambda(tableName: string) {
+    const entry = new lambda.Function(this, 'BufferCacheHitRatioLambda', {
+      runtime: cdk.aws_lambda.Runtime.NODEJS_18_X,
+      functionName: 'BufferCacheHitRatioLambda',
+      handler: 'iterateLogsOnASchedule',
+      code: lambda.Code.fromAsset('lambda'),
+      environment: {
+        DYNAMODB_TABLE_NAME: tableName
+      }
+    });
   }
 
   private createDynamoDb() {
@@ -29,6 +43,7 @@ export class BackendStack extends cdk.Stack {
       readCapacity: 5,
       writeCapacity: 5,
     });
+    return dynamoDb.tableName;
   }
 
   private createRdsClusters(vpc: cdk.aws_ec2.Vpc) {
