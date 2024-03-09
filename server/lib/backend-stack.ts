@@ -3,6 +3,8 @@ import { Construct } from 'constructs';
 import * as rds from 'aws-cdk-lib/aws-rds';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
+import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
+import path = require('path');
 
 export class BackendStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -17,13 +19,13 @@ export class BackendStack extends cdk.Stack {
   }
 
   private createLambda(tableName: string) {
-    const entry = new lambda.Function(this, 'BufferCacheHitRatioLambda', {
-      runtime: cdk.aws_lambda.Runtime.NODEJS_18_X,
-      functionName: 'BufferCacheHitRatioLambda',
+    const lambdaFunction = new NodejsFunction(this, 'LambdaFunction', {
+      entry: path.join(__dirname, "lambda/index.ts"),
       handler: 'iterateLogsOnASchedule',
-      code: lambda.Code.fromAsset('lambda'),
+      runtime: lambda.Runtime.NODEJS_18_X,
+      functionName: "BufferCacheLambda",
       environment: {
-        DYNAMODB_TABLE_NAME: tableName
+        DYNAMODB_TABLE_NAME: tableName,
       }
     });
   }

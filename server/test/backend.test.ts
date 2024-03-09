@@ -57,7 +57,7 @@ test('lambda is created', () => {
     // THEN
     const template = Template.fromStack(stack);
     template.hasResourceProperties('AWS::Lambda::Function',
-        { FunctionName: 'BufferCacheHitRatioLambda' }
+        { FunctionName: 'BufferCacheLambda' }
     );
 });
 
