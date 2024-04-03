@@ -48,6 +48,76 @@ test('4 subnets are created in different AZ', () => {
     });
 });
 
+//Test to validate lambda has rds:DescribeDBClusters permissions
+test('lambda has rds:DescribeDBClusters permissions', () => {
+    const app = new cdk.App();
+    // WHEN
+    const stack = new Backend.BackendStack(app, 'MyTestStack');
+    // THEN
+    const template = Template.fromStack(stack);
+
+    template.hasResourceProperties('AWS::IAM::Policy', {
+        PolicyDocument: {
+            Statement: [
+                {
+                    Action: 'rds:DescribeDBClusters',
+                    Effect: 'Allow',
+                    Resource: '*'
+                }
+            ],
+            Version: '2012-10-17'
+        }
+    });
+});
+
+test('lambda has cloudwatch:GetMetricStatistics permissions', () => {
+    const app = new cdk.App();
+    // WHEN
+    const stack = new Backend.BackendStack(app, 'MyTestStack');
+    // THEN
+    const template = Template.fromStack(stack);
+
+    template.hasResourceProperties('AWS::IAM::Policy', {
+        PolicyDocument: {
+            Statement: [
+                {
+                    Action: 'cloudwatch:GetMetricStatistics',
+                    Effect: 'Allow',
+                    Resource: '*'
+                }
+            ],
+            Version: '2012-10-17'
+        }
+    });
+});
+
+//test to make sure lambda has permissions to write to dynamodb to specific table BufferCacheHitRatioMetrics
+test('lambda has permissions to write to dynamodb to BufferCacheHitRatioMetrics', () => {
+    const app = new cdk.App();
+    // WHEN
+    const stack = new Backend.BackendStack(app, 'MyTestStack');
+    // THEN
+    const template = Template.fromStack(stack);
+
+    template.hasResourceProperties('AWS::IAM::Policy', {
+        PolicyDocument: {
+            Statement: [
+                {
+                    Action: 'dynamodb:*',
+                    Effect: 'Allow',
+                    Resource: {
+                        'Fn::GetAtt': [
+                            'BufferCacheHitRatioMetrics',
+                            'Arn'
+                        ]
+                    }
+                }
+            ],
+            Version: '2012-10-17'
+        }
+    });
+});
+
 
 //Write a test for createLambda lambda
 test('lambda is created', () => {
