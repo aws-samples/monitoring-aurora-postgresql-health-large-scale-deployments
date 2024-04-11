@@ -7,7 +7,6 @@ import * as iam from 'aws-cdk-lib/aws-iam';
 import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import path = require('path');
-import { IamResource } from 'aws-cdk-lib/aws-appsync';
 import { Cors } from 'aws-cdk-lib/aws-apigateway';
 
 export class BackendStack extends cdk.Stack {
@@ -19,12 +18,13 @@ export class BackendStack extends cdk.Stack {
     //and 1 writer instance
     this.createRdsClusters(vpc);
     const table = this.createDynamoDb();
-    this.createLambda(table);
-    this.createApiGateway(table);
+    this.createBackendLambda(table);
+    const queryLambda = this.createQueryLambda(table);
+    this.createApiGateway(table, queryLambda);
   }
 
   //Function to create API Gateway with a GET method which integrates with Query of dynmodb table directly without Graphql
-  private createApiGateway(table: cdk.aws_dynamodb.Table) {
+  private createApiGateway(table: cdk.aws_dynamodb.Table, lambda: NodejsFunction) {
     // API Gateway
     const apiGateway = new apigateway.RestApi(this, 'ProxyCacheAPI', {
       cloudWatchRole: true,
@@ -46,48 +46,18 @@ export class BackendStack extends cdk.Stack {
         burstLimit: 200
       },
     });
-    const integrationRole = new iam.Role(this, 'DynamoDBIntegrationRole', {
-      assumedBy: new iam.ServicePrincipal('apigateway.amazonaws.com'),
-    })
+
     // Integration with DynamoDB
-    const integration = new apigateway.AwsIntegration({
-      service: 'dynamodb',
-      action: 'Scan',
-      integrationHttpMethod: 'POST',
-      options: {
-        credentialsRole: integrationRole,
-        requestTemplates: {
-          'application/json': JSON.stringify({
-            TableName: table.tableName,
-          }),
-        },
-        passthroughBehavior: apigateway.PassthroughBehavior.NEVER,
-        requestParameters: {
-          'integration.request.header.Content-Type': "'application/x-amz-json-1.0'",
-        },
-        integrationResponses: [
-          {
-            statusCode: '200',
-            responseTemplates: {
-              'application/json': JSON.stringify({
-                items: '$input.path(\'$.Items\')',
-              }),
-            },
-          },
-        ],
-      },
-    });
+    //this.addQueryAll(integrationRole, table, apiGateway);
 
-
-    // add  dynamodb:Scan permission for tableName to integration
-    table.grantReadData(integrationRole);
-
-    //Add resource to api gateway name it query-all and integrate with integration
-    const resource = apiGateway.root.addResource('query-all');
-    resource.addMethod('GET', integration, {methodResponses: [{statusCode: '200'}]});
+    const proxyIntegration = new apigateway.LambdaIntegration(lambda);
+    const proxyResource = apiGateway.root.addResource('query-all-instances');
+    proxyResource.addMethod('GET', proxyIntegration, { methodResponses: [{ statusCode: '200' }] })
+    const proxyResource2 = apiGateway.root.addResource('query-all');
+    proxyResource2.addMethod('GET', proxyIntegration, { methodResponses: [{ statusCode: '200' }] })
   }
 
-  private createLambda(table: cdk.aws_dynamodb.Table) {
+  private createBackendLambda(table: cdk.aws_dynamodb.Table) {
 
     const lambdaFunction = new NodejsFunction(this, 'LambdaFunction', {
       entry: path.join(__dirname, "lambda/index.ts"),
@@ -125,21 +95,30 @@ export class BackendStack extends cdk.Stack {
     table.grantFullAccess(lambdaFunction);
   }
 
+  private createQueryLambda(table: cdk.aws_dynamodb.Table) {
+    const lambdaFunction = new NodejsFunction(this, 'querylambdaFunction', {
+      entry: path.join(__dirname, "lambda/querylambda.ts"),
+      handler: 'handler',
+      runtime: lambda.Runtime.NODEJS_18_X,
+      timeout: cdk.Duration.minutes(5),
+      functionName: "querylambda",
+      environment: {
+        DYNAMODB_TABLE_NAME: table.tableName,
+      }
+    });
+    table.grantFullAccess(lambdaFunction);
+    return lambdaFunction
+  }
+
   private createDynamoDb() {
-    const dynamoDb = new cdk.aws_dynamodb.Table(this, 'BufferCacheHitRatioMetrics', {
-      tableName: 'BufferCacheHitRatioMetrics',
+    const dynamoDb = new cdk.aws_dynamodb.Table(this, 'CacheHitRatioMetrics', {
+      tableName: 'CacheHitRatioMetrics',
       partitionKey: { name: 'InstanceId', type: cdk.aws_dynamodb.AttributeType.STRING },
-      sortKey: { name: 'DateHourTimeZone', type: cdk.aws_dynamodb.AttributeType.STRING },
+      sortKey: { name: 'DateHourTimeZone', type: cdk.aws_dynamodb.AttributeType.NUMBER },
       readCapacity: 5,
       writeCapacity: 5,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
-    // dynamoDb.addGlobalSecondaryIndex({
-    //   indexName: 'MetricValueIndex',
-    //   partitionKey: { name: 'MetricValueAverage', type: cdk.aws_dynamodb.AttributeType.NUMBER },
-    //   readCapacity: 5,
-    //   writeCapacity: 5,
-    // });
     return dynamoDb;
   }
 

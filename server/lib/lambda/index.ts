@@ -60,10 +60,12 @@ const iterateLogs = async () => {
                 if (dataPoint.Average && dataPoint.Average <= 99.9) {
                     //format datapoint.average as a string with 2 decimal places
                     const average = dataPoint.Average.toFixed(2);
-                    //format startTime into Year-Month-Date Hour and Timezone format
-                    const startTimeFormatted = startTime.toLocaleString('en-US', { timeZoneName: 'short' })
-                    //insert ReportItem in dynamodb table named BufferCacheHitRatioMetrics
-                    insertIntoDynamoDb(instanceId, average, startTimeFormatted);
+                    // Get timestamp in milliseconds
+                    const startTimeMs = startTime.getTime();
+                    // Convert to seconds 
+                    const startTimeEpoch = Math.floor(startTimeMs / 1000);
+                    //insert ReportItem in dynamodb table named CacheHitRatioMetrics
+                    insertIntoDynamoDb(instanceId, average, startTimeEpoch);
                 }
             }
         }
@@ -71,15 +73,15 @@ const iterateLogs = async () => {
 
 }
 
-const insertIntoDynamoDb = async (instanceId: string, average: string, startTimeFormatted: string) => {
-    console.log(`Inserting into dynamodb ${instanceId} ${average} ${startTimeFormatted}`);
+const insertIntoDynamoDb = async (instanceId: string, average: string, startTimeEpoch: number) => {
+    console.log(`Inserting into dynamodb ${instanceId} ${average} ${startTimeEpoch}`);
     const dynamodb = new DynamoDB();
     const putResult = dynamodb.putItem({
         TableName: process.env.DYNAMODB_TABLE_NAME,
         Item: {
             'InstanceId': { S: instanceId },
             'MetricValueAverage': { N: average },
-            'DateHourTimeZone': { S: startTimeFormatted }
+            'DateHourTimeZone': { N: startTimeEpoch.toString() }
         }
     });
     return true;
@@ -87,6 +89,5 @@ const insertIntoDynamoDb = async (instanceId: string, average: string, startTime
 
 export const iterateLogsOnASchedule: EventBridgeHandler<"Dynamo Entry", any, void> = async (event: EventBridgeEvent<any, any>) => {
     console.log(event);
-    console.log("Iterating logs");
     await iterateLogs();
 }

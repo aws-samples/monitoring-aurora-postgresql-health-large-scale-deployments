@@ -91,8 +91,8 @@ test('lambda has cloudwatch:GetMetricStatistics permissions', () => {
     });
 });
 
-//test to make sure lambda has permissions to write to dynamodb to specific table BufferCacheHitRatioMetrics
-test('lambda has permissions to write to dynamodb to BufferCacheHitRatioMetrics', () => {
+//test to make sure lambda has permissions to write to dynamodb to specific table CacheHitRatioMetrics
+test('lambda has permissions to write to dynamodb to CacheHitRatioMetrics', () => {
     const app = new cdk.App();
     // WHEN
     const stack = new Backend.BackendStack(app, 'MyTestStack');
@@ -107,7 +107,7 @@ test('lambda has permissions to write to dynamodb to BufferCacheHitRatioMetrics'
                     Effect: 'Allow',
                     Resource: {
                         'Fn::GetAtt': [
-                            'BufferCacheHitRatioMetrics',
+                            'CacheHitRatioMetrics',
                             'Arn'
                         ]
                     }
@@ -151,7 +151,7 @@ test('Dynamodb is created', () => {
     const template = Template.fromStack(stack);
 
     template.hasResourceProperties('AWS::DynamoDB::Table', {
-        TableName: 'BufferCacheHitRatioMetrics',
+        TableName: 'CacheHitRatioMetrics',
         KeySchema: [
             {
                 'AttributeName': 'InstanceId',
@@ -170,33 +170,11 @@ test('Dynamodb is created', () => {
             {
                 'AttributeName': 'DateHourTimeZone',
                 'AttributeType': 'S'
-            },
-            {
-                'AttributeName': 'MetricValueAverage',
-                'AttributeType': 'N'
             }
         ],
         ProvisionedThroughput: {
             'ReadCapacityUnits': 5,
             'WriteCapacityUnits': 5
-        },
-        GlobalSecondaryIndexes: [
-            {
-                'IndexName': 'MetricValueIndex',
-                'KeySchema': [
-                    {
-                        'AttributeName': 'MetricValueAverage',
-                        'KeyType': 'HASH'
-                    }
-                ],
-                'Projection': {
-                    'ProjectionType': 'ALL'
-                },
-                'ProvisionedThroughput': {
-                    'ReadCapacityUnits': 5,
-                    'WriteCapacityUnits': 5
-                }
-            }
-        ]
+        }
     })
 })
