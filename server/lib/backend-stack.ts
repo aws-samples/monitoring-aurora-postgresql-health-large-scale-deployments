@@ -31,7 +31,6 @@ export class BackendStack extends cdk.Stack {
       defaultCorsPreflightOptions: {
         allowOrigins: Cors.ALL_ORIGINS,
       },
-
     });
 
     apiGateway.addUsagePlan('usage-plan', {
@@ -42,19 +41,15 @@ export class BackendStack extends cdk.Stack {
         stage: apiGateway.deploymentStage,
       }],
       throttle: {
-        rateLimit: 100,
-        burstLimit: 200
+        rateLimit: 200,
+        burstLimit: 300
       },
     });
-
-    // Integration with DynamoDB
-    //this.addQueryAll(integrationRole, table, apiGateway);
-
     const proxyIntegration = new apigateway.LambdaIntegration(lambda);
     const proxyResource = apiGateway.root.addResource('query-all-instances');
     proxyResource.addMethod('GET', proxyIntegration, { methodResponses: [{ statusCode: '200' }] })
     const proxyResource2 = apiGateway.root.addResource('query-all');
-    proxyResource2.addMethod('GET', proxyIntegration, { methodResponses: [{ statusCode: '200' }] })
+    proxyResource2.addMethod('GET', proxyIntegration, { methodResponses: [{ statusCode: '200' }] });
   }
 
   private createBackendLambda(table: cdk.aws_dynamodb.Table) {

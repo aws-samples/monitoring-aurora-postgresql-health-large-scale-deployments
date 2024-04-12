@@ -83,10 +83,14 @@ export const handler = async (event: APIGatewayEvent) => {
     try {
         if (event.path === "/query-all-instances") {
             const uniqueValues = await scanTableAndExtractUniqueInstanceIds();
-            // Further processing or actions with the unique values can be done here
             return {
                 statusCode: 200,
-                body: JSON.stringify(uniqueValues)
+                body: JSON.stringify(uniqueValues),
+                headers: {
+                    "Access-Control-Allow-Headers": "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent",
+                    "Access-Control-Allow-Origin": "*",
+                    "Access-Control-Allow-Methods": "OPTIONS,GET"
+                },
             };
         } else if (event.path === "/query-all") {
             const instanceId = event.queryStringParameters?.instanceId;
@@ -96,7 +100,14 @@ export const handler = async (event: APIGatewayEvent) => {
             const result = await queryTableByInstanceId(instanceId || '', startTimeEpoch || '', endTimeEpoch || '');
             return {
                 statusCode: 200,
-                body: JSON.stringify(result)
+                body: JSON.stringify(result),
+                headers: {
+                    "Access-Control-Allow-Headers": "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent",
+                    "Access-Control-Allow-Origin": "*",
+                    "Access-Control-Allow-Methods": "OPTIONS,GET"
+                },
+                
+
             };
         } else {
             return {
@@ -113,7 +124,12 @@ export const handler = async (event: APIGatewayEvent) => {
             statusCode: 500,
             body: JSON.stringify({
                 message: JSON.stringify(error)
-            })
+            }),
+            headers: {
+                "Access-Control-Allow-Headers": "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent",
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Methods": "OPTIONS,GET"
+            },
         };
     }
 };
