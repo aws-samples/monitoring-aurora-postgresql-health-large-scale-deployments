@@ -9,21 +9,32 @@ import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import path = require('path');
 import { Cors } from 'aws-cdk-lib/aws-apigateway';
 
+interface MyStackProps extends cdk.StackProps {
+  scheduleDuration: number;
+}
 export class BackendStack extends cdk.Stack {
-  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
-    super(scope, id, props);
-    //Create VPC with CIDR 10.0.0.0/16 and 4 subnets, two public and two private
+  private scheduleDuration = 1;
+  constructor(app: Construct, id: string, props?: MyStackProps) {
+    super(app, id, props);
     const vpc = this.createVpc();
-    //Create 3 RDS Aurora Postgres clusters with version 15.2 using the vpc and each with 2 reader instances
-    //and 1 writer instance
     this.createRdsClusters(vpc);
     const table = this.createDynamoDb();
-    this.createBackendLambda(table);
+    if (props) {
+      this.scheduleDuration = props.scheduleDuration;
+    };
+    const backendLambda = this.createBackendLambda(table);
+    this.createEventBridge(app, backendLambda);
     const queryLambda = this.createQueryLambda(table);
     this.createApiGateway(table, queryLambda);
   }
 
-  //Function to create API Gateway with a GET method which integrates with Query of dynmodb table directly without Graphql
+  createEventBridge(app: Construct, backendLambda: NodejsFunction) {
+    const rule = new cdk.aws_events.Rule(this, 'Rule', {
+      schedule: cdk.aws_events.Schedule.rate(cdk.Duration.hours(this.scheduleDuration))
+    });
+    rule.addTarget(new cdk.aws_events_targets.LambdaFunction(backendLambda));
+  }
+
   private createApiGateway(table: cdk.aws_dynamodb.Table, lambda: NodejsFunction) {
     // API Gateway
     const apiGateway = new apigateway.RestApi(this, 'ProxyCacheAPI', {
@@ -62,6 +73,7 @@ export class BackendStack extends cdk.Stack {
       functionName: "BufferCacheLambda",
       environment: {
         DYNAMODB_TABLE_NAME: table.tableName,
+        NUMBER_OF_HOURS_TO_CAPTURE_DATA_FOR: this.scheduleDuration.toString()
       }
     });
 
@@ -88,6 +100,7 @@ export class BackendStack extends cdk.Stack {
     lambdaFunction.addToRolePolicy(describeClustersPolicyStatement);
     lambdaFunction.addToRolePolicy(cloudWatchPolicyStatement);
     table.grantFullAccess(lambdaFunction);
+    return lambdaFunction;
   }
 
   private createQueryLambda(table: cdk.aws_dynamodb.Table) {
