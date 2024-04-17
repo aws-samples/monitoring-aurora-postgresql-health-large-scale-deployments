@@ -8,20 +8,23 @@ import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import path = require('path');
 import { Cors } from 'aws-cdk-lib/aws-apigateway';
+import { AnyPrincipal } from 'aws-cdk-lib/aws-iam';
 
 interface MyStackProps extends cdk.StackProps {
   scheduleDuration: number;
+  sourceIp: string;
 }
+
 export class BackendStack extends cdk.Stack {
   private scheduleDuration = 1;
-  constructor(app: Construct, id: string, props?: MyStackProps) {
+  private sourceIp = '';
+  constructor(app: Construct, id: string, props: MyStackProps) {
     super(app, id, props);
     const vpc = this.createVpc();
     this.createRdsClusters(vpc);
     const table = this.createDynamoDb();
-    if (props) {
-      this.scheduleDuration = props.scheduleDuration;
-    };
+    this.scheduleDuration = props.scheduleDuration;
+    this.sourceIp = props.sourceIp;
     const backendLambda = this.createBackendLambda(table);
     this.createEventBridge(app, backendLambda);
     const queryLambda = this.createQueryLambda(table);
@@ -37,11 +40,34 @@ export class BackendStack extends cdk.Stack {
 
   private createApiGateway(table: cdk.aws_dynamodb.Table, lambda: NodejsFunction) {
     // API Gateway
+    const explicitDenyExceptOne = new iam.PolicyStatement({
+      effect: iam.Effect.DENY,
+      actions: ['execute-api:Invoke'],
+      resources: ['execute-api:/*/*/*'],
+      principals: [new iam.AnyPrincipal()],
+      conditions: {
+        NotIpAddress: {
+          'aws:SourceIp': [this.sourceIp]
+        }
+      }
+    });
+
+    const allowEverythingElse = new iam.PolicyStatement({
+      actions: ['execute-api:Invoke'],
+      principals: [new AnyPrincipal()],
+      resources: ['execute-api:/*/*/*'],
+    });
+
+    const apiResourcePolicy = new iam.PolicyDocument({
+      statements: [explicitDenyExceptOne, allowEverythingElse]
+    });
+
     const apiGateway = new apigateway.RestApi(this, 'ProxyCacheAPI', {
       cloudWatchRole: true,
       defaultCorsPreflightOptions: {
         allowOrigins: Cors.ALL_ORIGINS,
       },
+      policy: apiResourcePolicy
     });
 
     apiGateway.addUsagePlan('usage-plan', {
@@ -56,6 +82,10 @@ export class BackendStack extends cdk.Stack {
         burstLimit: 300
       },
     });
+
+
+
+
     const proxyIntegration = new apigateway.LambdaIntegration(lambda);
     const proxyResource = apiGateway.root.addResource('query-all-instances');
     proxyResource.addMethod('GET', proxyIntegration, { methodResponses: [{ statusCode: '200' }] })
@@ -114,7 +144,7 @@ export class BackendStack extends cdk.Stack {
         DYNAMODB_TABLE_NAME: table.tableName,
       }
     });
-    table.grantFullAccess(lambdaFunction);
+    table.grantReadData(lambdaFunction);
     return lambdaFunction
   }
 
@@ -145,6 +175,7 @@ export class BackendStack extends cdk.Stack {
         subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
       },
       vpc,
+      storageEncrypted: true
     });
     const cluster01 = new rds.DatabaseCluster(this, 'AuroraCluster01', {
       engine: rds.DatabaseClusterEngine.auroraPostgres({ version: rds.AuroraPostgresEngineVersion.VER_15_2 }),
@@ -160,6 +191,7 @@ export class BackendStack extends cdk.Stack {
         subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
       },
       vpc,
+      storageEncrypted: true
     });
     const cluster03 = new rds.DatabaseCluster(this, 'AuroraCluster03', {
       engine: rds.DatabaseClusterEngine.auroraPostgres({ version: rds.AuroraPostgresEngineVersion.VER_15_2 }),
@@ -175,6 +207,7 @@ export class BackendStack extends cdk.Stack {
         subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
       },
       vpc,
+      storageEncrypted: true
     });
   }
 

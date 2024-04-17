@@ -79,7 +79,6 @@ const queryTableByInstanceId = async (instanceId: string, startTimeEpoch: string
 
 // Lambda handler function
 export const handler = async (event: APIGatewayEvent) => {
-    console.log(event);
     try {
         if (event.path === "/query-all-instances") {
             const uniqueValues = await scanTableAndExtractUniqueInstanceIds();

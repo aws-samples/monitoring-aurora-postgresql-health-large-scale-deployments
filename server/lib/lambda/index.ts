@@ -81,7 +81,6 @@ const insertIntoDynamoDb = async (instanceId: string, average: string, startTime
 }
 
 export const iterateLogsOnASchedule: EventBridgeHandler<"Dynamo Entry", any, void> = async (event: EventBridgeEvent<any, any>) => {
-    console.log(event);
     const numberOfHours: number = parseInt(process.env.NUMBER_OF_HOURS_TO_CAPTURE_DATA_FOR || '') || 1;
     await iterateLogs(numberOfHours);
 }
