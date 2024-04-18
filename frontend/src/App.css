@@ -22,3 +22,8 @@
   color: white;
 }
 
+.ReportingButton {
+  display: flex;
+  padding-top: 25px;
+}
+
