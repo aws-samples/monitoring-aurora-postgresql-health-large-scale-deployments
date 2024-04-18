@@ -3,11 +3,13 @@ import React, { useState } from 'react';
 import InstanceSelector from './InstanceSelector';
 import Box from '@mui/material/Box'
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
+import { LineChart } from '@mui/x-charts/LineChart';
 type CacheRecord = { id: string, InstanceId: string; MetricValueAverage: number; DateHourTimeZone: string; }
 
 export default function CacheMetrics() {
+
     const columns: GridColDef<CacheRecord>[] = [
-        { field: 'id', headerName: 'ID', width: 90},
+        { field: 'id', headerName: 'ID', width: 90 },
         {
             field: 'InstanceId',
             headerName: 'InstanceId',
@@ -23,13 +25,11 @@ export default function CacheMetrics() {
             headerName: 'Date/Time',
             type: 'string',
             width: 200,
-            valueFormatter: (params: number) => { const date = new Date(params*1000); return date.toLocaleString() }
+            valueFormatter: (params: number) => { const date = new Date(params * 1000); return date.toLocaleString() }
         },
     ];
     const initialRows: CacheRecord[] = [];
     const [rows, setRows] = useState(initialRows);
-
-    //const rows: { InstanceId: string; MetricValueAverage: number; DateHourTimeZone: string; }[] = [];
 
     const updateTable = (data: CacheRecord[]) => {
         setRows(data.map((item, index) => {
@@ -45,7 +45,20 @@ export default function CacheMetrics() {
     return (
         <Box sx={{ height: 400, width: '100%' }}>
             <InstanceSelector onDataFetch={updateTable} />
-            <DataGrid
+            {rows && rows.length > 0 && <LineChart
+                grid={{ vertical: true, horizontal: true }}
+                dataset={rows}
+                series={[{ dataKey: 'MetricValueAverage', label: 'MetricsValueAverage' }]}
+                xAxis={[{
+                    scaleType: 'point', dataKey: 'DateHourTimeZone', valueFormatter: (timestamp: number) => {
+                        const date = new Date(timestamp * 1000);
+                        const formatter = new Intl.DateTimeFormat('en-US', { dateStyle: 'short', timeStyle: 'short' });
+                        const formattedDate = formatter.format(date);
+                        return formattedDate;
+                    }, label: 'Date/Time',
+                }]}
+            />}
+             {/* {rows && rows.length > 0 && <DataGrid
                 rows={rows}
                 columns={columns}
                 initialState={{
@@ -56,7 +69,7 @@ export default function CacheMetrics() {
                     },
                 }}
                 pageSizeOptions={[10]}
-            />
+            />} */}
         </Box>
     );
 

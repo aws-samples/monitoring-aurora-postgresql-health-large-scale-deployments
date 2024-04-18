@@ -2,10 +2,23 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  padding-top: 100px;
+  padding-top: 50px;
   padding-left: 100px;
   padding-right: 100px;
   align-items: center;
   font-size: calc(10px + 2vmin);
   color: white;
 }
+
+.Box {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding-top: 50px;
+  padding-left: 100px;
+  padding-right: 100px;
+  align-items: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
