@@ -1,4 +1,4 @@
-<mxfile host="Electron" modified="2024-04-16T23:32:34.860Z" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/24.2.5 Chrome/120.0.6099.109 Electron/28.1.0 Safari/537.36" etag="hIOnfw4H7W2l0i35kUsy" version="24.2.5" type="device">
+<mxfile host="Electron" modified="2024-04-24T21:00:03.814Z" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/24.2.5 Chrome/120.0.6099.109 Electron/28.1.0 Safari/537.36" etag="YCfq7Ja_v0S0Qi53DRmv" version="24.2.5" type="device">
   <diagram name="Page-1" id="q4Ue6YyPpZgn4tm0QDJ6">
     <mxGraphModel dx="1434" dy="854" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
       <root>
@@ -25,6 +25,11 @@
         <mxCell id="QT1-Vc51EwQWDzW_PCwE-23" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="QT1-Vc51EwQWDzW_PCwE-8" target="QT1-Vc51EwQWDzW_PCwE-10" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
+        <mxCell id="sazl7aqYjBEjnZ1m-L6P-1" value="User Configured Metrics with Pre-decided Threshold" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="QT1-Vc51EwQWDzW_PCwE-23">
+          <mxGeometry x="-0.1057" y="-2" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
         <mxCell id="QT1-Vc51EwQWDzW_PCwE-8" value="Backend Lambda" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;fillColor=#ED7100;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.lambda;" parent="1" vertex="1">
           <mxGeometry x="716" y="341" width="78" height="78" as="geometry" />
         </mxCell>
@@ -45,7 +50,7 @@
             <mxPoint x="539" y="380" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="QT1-Vc51EwQWDzW_PCwE-43" value="BufferCacheHitRatio" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="QT1-Vc51EwQWDzW_PCwE-19" vertex="1" connectable="0">
+        <mxCell id="QT1-Vc51EwQWDzW_PCwE-43" value="Metrics" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="QT1-Vc51EwQWDzW_PCwE-19" vertex="1" connectable="0">
           <mxGeometry x="-0.1654" relative="1" as="geometry">
             <mxPoint x="5" as="offset" />
           </mxGeometry>
@@ -53,7 +58,7 @@
         <mxCell id="QT1-Vc51EwQWDzW_PCwE-20" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="QT1-Vc51EwQWDzW_PCwE-5" target="QT1-Vc51EwQWDzW_PCwE-9" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="QT1-Vc51EwQWDzW_PCwE-44" value="BufferCacheHitRatio" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="QT1-Vc51EwQWDzW_PCwE-20" vertex="1" connectable="0">
+        <mxCell id="QT1-Vc51EwQWDzW_PCwE-44" value="Metrics" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="QT1-Vc51EwQWDzW_PCwE-20" vertex="1" connectable="0">
           <mxGeometry x="-0.4715" y="3" relative="1" as="geometry">
             <mxPoint as="offset" />
           </mxGeometry>
@@ -61,7 +66,7 @@
         <mxCell id="QT1-Vc51EwQWDzW_PCwE-21" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="QT1-Vc51EwQWDzW_PCwE-3" target="QT1-Vc51EwQWDzW_PCwE-9" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="QT1-Vc51EwQWDzW_PCwE-42" value="BufferCacheHitRatio" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="QT1-Vc51EwQWDzW_PCwE-21" vertex="1" connectable="0">
+        <mxCell id="QT1-Vc51EwQWDzW_PCwE-42" value="Metrics" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="QT1-Vc51EwQWDzW_PCwE-21" vertex="1" connectable="0">
           <mxGeometry x="0.0599" y="-1" relative="1" as="geometry">
             <mxPoint x="-38" y="-1" as="offset" />
           </mxGeometry>

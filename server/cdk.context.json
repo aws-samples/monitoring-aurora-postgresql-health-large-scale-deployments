@@ -1,4 +1,18 @@
 {
+  "scheduleDurationInHours": 1,
+  "sourceIp": "173.71.123.159",
+  "metricsTracked": [
+    {
+      "name": "VolumeReadIOPS",
+      "threshold": 90,
+      "thresholdOperator": "<="
+    },
+    {
+      "name": "BufferCacheHitRatio",
+      "threshold": 100,
+      "thresholdOperator": ">="
+    }
+  ],
   "availability-zones:account=259847763656:region=us-east-1": [
     "us-east-1a",
     "us-east-1b",

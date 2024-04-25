@@ -6,13 +6,21 @@ import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
-import path = require('path');
+import path from 'path';
 import { Cors } from 'aws-cdk-lib/aws-apigateway';
 import { AnyPrincipal } from 'aws-cdk-lib/aws-iam';
+import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 
 interface MyStackProps extends cdk.StackProps {
   scheduleDuration: number;
   sourceIp: string;
+  metricsTracked: MetricConfig[]
+}
+
+type MetricConfig = {
+  name: string;
+  threshold: number;
+  thresholdOperator: string;
 }
 
 export class BackendStack extends cdk.Stack {
@@ -25,11 +33,22 @@ export class BackendStack extends cdk.Stack {
     const table = this.createDynamoDb();
     this.scheduleDuration = props.scheduleDuration;
     this.sourceIp = props.sourceIp;
-    const backendLambda = this.createBackendLambda(table);
+    const metricsTracked = this.createMetricsTrackedParameter(props.metricsTracked)
+    const backendLambda = this.createBackendLambda(table, metricsTracked);
     this.createEventBridge(app, backendLambda);
     const queryLambda = this.createQueryLambda(table);
     this.createApiGateway(table, queryLambda);
   }
+
+  //Upload the Metrics Tracked to Paramter store in AWS
+  createMetricsTrackedParameter(metricsTracked: MetricConfig[]) {
+    const parameter = new cdk.aws_ssm.StringParameter(this, 'MetricsTrackedParameter', {
+      parameterName: 'MetricsTracked',
+      stringValue: JSON.stringify(metricsTracked),
+    });
+    return parameter;
+  }
+
 
   createEventBridge(app: Construct, backendLambda: NodejsFunction) {
     const rule = new cdk.aws_events.Rule(this, 'Rule', {
@@ -83,9 +102,6 @@ export class BackendStack extends cdk.Stack {
       },
     });
 
-
-
-
     const proxyIntegration = new apigateway.LambdaIntegration(lambda);
     const proxyResource = apiGateway.root.addResource('query-all-instances');
     proxyResource.addMethod('GET', proxyIntegration, { methodResponses: [{ statusCode: '200' }] })
@@ -93,7 +109,7 @@ export class BackendStack extends cdk.Stack {
     proxyResource2.addMethod('GET', proxyIntegration, { methodResponses: [{ statusCode: '200' }] });
   }
 
-  private createBackendLambda(table: cdk.aws_dynamodb.Table) {
+  private createBackendLambda(table: cdk.aws_dynamodb.Table, metricsTracked: StringParameter) {
 
     const lambdaFunction = new NodejsFunction(this, 'LambdaFunction', {
       entry: path.join(__dirname, "lambda/index.ts"),
@@ -103,7 +119,8 @@ export class BackendStack extends cdk.Stack {
       functionName: "BufferCacheLambda",
       environment: {
         DYNAMODB_TABLE_NAME: table.tableName,
-        NUMBER_OF_HOURS_TO_CAPTURE_DATA_FOR: this.scheduleDuration.toString()
+        NUMBER_OF_HOURS_TO_CAPTURE_DATA_FOR: this.scheduleDuration.toString(),
+        METRICS_TRACKED: metricsTracked.parameterName
       }
     });
 
@@ -130,6 +147,7 @@ export class BackendStack extends cdk.Stack {
     lambdaFunction.addToRolePolicy(describeClustersPolicyStatement);
     lambdaFunction.addToRolePolicy(cloudWatchPolicyStatement);
     table.grantFullAccess(lambdaFunction);
+    metricsTracked.grantRead(lambdaFunction);
     return lambdaFunction;
   }
 
@@ -162,6 +180,7 @@ export class BackendStack extends cdk.Stack {
 
   private createRdsClusters(vpc: cdk.aws_ec2.Vpc) {
     const cluster02 = new rds.DatabaseCluster(this, 'AuroraCluster02', {
+      clusterIdentifier: 'AuroraCluster02',
       engine: rds.DatabaseClusterEngine.auroraPostgres({ version: rds.AuroraPostgresEngineVersion.VER_15_2 }),
       writer: rds.ClusterInstance.provisioned('writer', {
         publiclyAccessible: false,
@@ -178,6 +197,7 @@ export class BackendStack extends cdk.Stack {
       storageEncrypted: true
     });
     const cluster01 = new rds.DatabaseCluster(this, 'AuroraCluster01', {
+      clusterIdentifier: 'AuroraCluster01',
       engine: rds.DatabaseClusterEngine.auroraPostgres({ version: rds.AuroraPostgresEngineVersion.VER_15_2 }),
       writer: rds.ClusterInstance.provisioned('writer', {
         publiclyAccessible: false,
@@ -194,6 +214,7 @@ export class BackendStack extends cdk.Stack {
       storageEncrypted: true
     });
     const cluster03 = new rds.DatabaseCluster(this, 'AuroraCluster03', {
+      clusterIdentifier: 'AuroraCluster03',
       engine: rds.DatabaseClusterEngine.auroraPostgres({ version: rds.AuroraPostgresEngineVersion.VER_15_2 }),
       writer: rds.ClusterInstance.provisioned('writer', {
         publiclyAccessible: false,
