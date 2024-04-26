@@ -8,14 +8,16 @@ import Select, { SelectChangeEvent } from '@mui/material/Select';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import Grid from '@mui/material/Grid';
 import Button from '@mui/material/Button';
+import { CacheRecord } from './CacheRecord';
 
-
-export default function InstanceSelector(props: { onDataFetch: (startTime: number, endTime: number, data: { id: string, InstanceId: string; MetricValueAverage: number; DateHourTimeZone: string; }[]) => void }): JSX.Element {
+export default function InstanceSelector(props: { onMetricsFetch: (metrics: any[]) => void, onDataFetch: (startTime: number, endTime: number, metricsName: string, data: CacheRecord[]) => void }): JSX.Element {
     const [items, setItems] = useState([]);
     const [startTime, setStartTime] = useState(Date.now);
     const [endTime, setEndTime] = useState(Date.now);
     const [instanceId, setInstanceId] = useState('');
     const [showDateRange, setShowDateRange] = useState(false);
+    const [metrics, setMetrics] = useState([{}]);
+    const [selectedMetric, setSelectedMetric] = useState('');
 
     const handleChange = (event: SelectChangeEvent) => {
         setInstanceId(event.target.value);
@@ -24,15 +26,26 @@ export default function InstanceSelector(props: { onDataFetch: (startTime: numbe
     const handleStartDateChagnge = (event: any) => {
         const startTimeMs = event.$d.getTime();
         const startTimeEpoch = Math.floor(startTimeMs / 1000);
-        console.log(startTimeEpoch);
         setStartTime(startTimeEpoch);
     }
     const handleEndDateChagnge = (event: any) => {
         const endTimeMs = event.$d.getTime();
         const endTimeEpoch = Math.floor(endTimeMs / 1000);
-        console.log(endTimeEpoch);
         setEndTime(endTimeEpoch);
     }
+
+    useEffect(() => {
+        let ignore = false;
+        //setMetrics([]);
+        fetch('https://xlqpb40i3g.execute-api.us-east-1.amazonaws.com/prod/metricslist')
+            .then(response => response.json())
+            .then(data => {
+                if (!ignore) {
+                    setMetrics(data);
+                    props.onMetricsFetch(data);
+                }
+            });
+    }, [])
 
     const handleSelectChange = (event: SelectChangeEvent) => {
 
@@ -66,11 +79,19 @@ export default function InstanceSelector(props: { onDataFetch: (startTime: numbe
             });
     }, [])
 
+
+    const handleMetricsChange = (event: SelectChangeEvent) => {
+        setSelectedMetric(event.target.value);
+    }
+
     const getReportData = () => {
-        fetch(`https://xlqpb40i3g.execute-api.us-east-1.amazonaws.com/prod/query-all?instanceId=${instanceId}&startTimeEpoch=${startTime}&endTimeEpoch=${endTime}`)
+        let query = `https://xlqpb40i3g.execute-api.us-east-1.amazonaws.com/prod/query-all?instanceId=${instanceId}&startTimeEpoch=${startTime}&endTimeEpoch=${endTime}`;
+        if (selectedMetric !== 'all')
+            query += `&metricName=${selectedMetric}`;
+        fetch(query)
             .then(response => response.json())
             .then(data => {
-                props.onDataFetch(startTime, endTime, data);
+                props.onDataFetch(startTime, endTime, selectedMetric, data);
             });
     }
 
@@ -86,6 +107,14 @@ export default function InstanceSelector(props: { onDataFetch: (startTime: numbe
                             onChange={handleChange}
                         >
                             {items.map((item: any) => <MenuItem value={item}>{item}</MenuItem>)}
+                        </Select>
+                        </FormControl>
+                    </Grid>
+                    <Grid item xs={3}>
+                        <FormControl fullWidth> <InputLabel id="demo-simple-select-label">Metrics</InputLabel>   <Select label="Metrics"
+                            onChange={handleMetricsChange}>
+                            <MenuItem value={"all"}>All</MenuItem>
+                            {metrics.map((item: any) => <MenuItem value={item.name}>{item.name}</MenuItem>)}
                         </Select>
                         </FormControl>
                     </Grid>

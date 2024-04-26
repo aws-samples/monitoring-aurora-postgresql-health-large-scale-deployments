@@ -28,9 +28,7 @@ const getCloudWatchMetric = async (db_instance_id: string, metricConfig: MetricC
         Statistics: ['Maximum'],
         Unit: 'Percent'
     });
-
     return data.Datapoints ?? [];
-
 }
 
 
