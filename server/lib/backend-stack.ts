@@ -174,10 +174,25 @@ export class BackendStack extends cdk.Stack {
     const dynamoDb = new cdk.aws_dynamodb.Table(this, 'CacheHitRatioMetrics', {
       tableName: 'CacheHitRatioMetrics',
       partitionKey: { name: 'InstanceId', type: cdk.aws_dynamodb.AttributeType.STRING },
-      sortKey: { name: 'DateHourTimeZone', type: cdk.aws_dynamodb.AttributeType.NUMBER },
       readCapacity: 5,
       writeCapacity: 5,
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      removalPolicy: cdk.RemovalPolicy.DESTROY
+    });
+
+    //enable TimeToLiveSpecification in dynamodb
+
+    const timeToLiveSpecificationProperty: cdk.aws_dynamodb.CfnGlobalTable.TimeToLiveSpecificationProperty = {
+      enabled: true,
+      // the properties below are optional
+      attributeName: 'expiresAt',
+    };
+
+    dynamoDb.addGlobalSecondaryIndex({
+      indexName: 'DateHourTimeZone-index',
+      partitionKey: { name: 'DateHourTimeZone', type: cdk.aws_dynamodb.AttributeType.NUMBER },
+      projectionType: cdk.aws_dynamodb.ProjectionType.ALL,
+      readCapacity: 5,
+      writeCapacity: 5,
     });
     return dynamoDb;
   }

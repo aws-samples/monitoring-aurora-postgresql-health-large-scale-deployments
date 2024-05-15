@@ -54,6 +54,27 @@ const scanTableAndExtractUniqueInstanceIds = async () => {
     }
 };
 
+const queryTableForAllInstances = async (startTimeEpoch: string, endTimeEpoch: string) => {
+    if (!process.env.DYNAMODB_TABLE_NAME || !startTimeEpoch || !endTimeEpoch) {
+        return {
+            statusCode: 400,
+            body: 'start date, end date or table name not specified'
+        };
+    }
+    let keyConditionExpression = 'DateHourTimeZone BETWEEN :startTimeEpoch AND :endTimeEpoch'
+    let params: AWS.DynamoDB.DocumentClient.QueryInput = {
+        TableName: process.env.DYNAMODB_TABLE_NAME,
+        KeyConditionExpression: keyConditionExpression,
+        ProjectionExpression: 'MetricValueAverage, DateHourTimeZone, InstanceId, MetricName',
+        ExpressionAttributeValues: {
+            ':startTimeEpoch': parseInt(startTimeEpoch),
+            ':endTimeEpoch': parseInt(endTimeEpoch)
+        }
+    }
+    const result = await dynamodb.query(params).promise();
+    return result.Items
+}
+
 //function to read querystring parameter instanceId and use it to query InstanceId field in dynamodb table CacheHitRatioMetrics and return matching results in json format
 const queryTableByInstanceId = async (instanceId: string, startTimeEpoch: string, endTimeEpoch: string, metricName: string) => {
     console.log(instanceId, startTimeEpoch, endTimeEpoch);
@@ -111,7 +132,11 @@ export const handler = async (event: APIGatewayEvent) => {
                 return sendSuccessResponse(JSON.stringify(uniqueValues));
                 break;
             case "/query-all":
-                const result = await queryTableByInstanceId(event.queryStringParameters?.instanceId || '', event.queryStringParameters?.startTimeEpoch || '', event.queryStringParameters?.endTimeEpoch || '', event.queryStringParameters?.metricName || '');
+                let result;
+                if(event.queryStringParameters?.instanceId)
+                result = await queryTableByInstanceId(event.queryStringParameters?.instanceId || '', event.queryStringParameters?.startTimeEpoch || '', event.queryStringParameters?.endTimeEpoch || '', event.queryStringParameters?.metricName || '');
+             else 
+                result = await queryTableForAllInstances(event.queryStringParameters?.startTimeEpoch || '', event.queryStringParameters?.endTimeEpoch || '');
                 return sendSuccessResponse(JSON.stringify(result));
                 break;
             case "/metricslist":

@@ -1,5 +1,5 @@
 {
-  "scheduleDurationInHours": 1,
+  "scheduleDurationInHours": 6,
   "sourceIp": "173.71.123.159",
   "metricsTracked": [
     {
@@ -9,8 +9,8 @@
     },
     {
       "name": "BufferCacheHitRatio",
-      "threshold": 100,
-      "thresholdOperator": ">="
+      "threshold": 80,
+      "thresholdOperator": "<="
     }
   ],
   "availability-zones:account=259847763656:region=us-east-1": [

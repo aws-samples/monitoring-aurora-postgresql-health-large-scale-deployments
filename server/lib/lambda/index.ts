@@ -89,7 +89,8 @@ const insertIntoDynamoDb = async (instanceId: string, metric: string, average: s
             'InstanceId': { S: instanceId },
             'MetricName': { S: metric },
             'MetricValueAverage': { N: average },
-            'DateHourTimeZone': { N: startTimeEpoch.toString() }
+            'DateHourTimeZone': { N: startTimeEpoch.toString() },
+            'expiresAt': { N: (Date.now() + (90 * 24 * 60 * 60)).toString() }
         }
     });
     return true;

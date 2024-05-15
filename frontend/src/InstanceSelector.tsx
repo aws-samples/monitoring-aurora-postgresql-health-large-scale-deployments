@@ -5,38 +5,25 @@ import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
-import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import Grid from '@mui/material/Grid';
 import Button from '@mui/material/Button';
 import { CacheRecord } from './CacheRecord';
+import ReportingPeriodSelector from './ReportingPeriodSelector';
 
 export default function InstanceSelector(props: { onMetricsFetch: (metrics: any[]) => void, onDataFetch: (startTime: number, endTime: number, metricsName: string, data: CacheRecord[]) => void }): JSX.Element {
     const [items, setItems] = useState([]);
-    const [startTime, setStartTime] = useState(Date.now);
-    const [endTime, setEndTime] = useState(Date.now);
     const [instanceId, setInstanceId] = useState('');
-    const [showDateRange, setShowDateRange] = useState(false);
     const [metrics, setMetrics] = useState([{}]);
     const [selectedMetric, setSelectedMetric] = useState('');
+    const [startTime, setStartTime] = useState(Date.now);
+    const [endTime, setEndTime] = useState(Date.now);
 
     const handleChange = (event: SelectChangeEvent) => {
         setInstanceId(event.target.value);
     };
 
-    const handleStartDateChagnge = (event: any) => {
-        const startTimeMs = event.$d.getTime();
-        const startTimeEpoch = Math.floor(startTimeMs / 1000);
-        setStartTime(startTimeEpoch);
-    }
-    const handleEndDateChagnge = (event: any) => {
-        const endTimeMs = event.$d.getTime();
-        const endTimeEpoch = Math.floor(endTimeMs / 1000);
-        setEndTime(endTimeEpoch);
-    }
-
     useEffect(() => {
         let ignore = false;
-        //setMetrics([]);
         fetch('https://xlqpb40i3g.execute-api.us-east-1.amazonaws.com/prod/metricslist')
             .then(response => response.json())
             .then(data => {
@@ -46,27 +33,6 @@ export default function InstanceSelector(props: { onMetricsFetch: (metrics: any[
                 }
             });
     }, [])
-
-    const handleSelectChange = (event: SelectChangeEvent) => {
-
-        switch (event.target.value) {
-            case "month":
-                setStartTime(Math.floor(Date.now() / 1000) - (30 * 24 * 60 * 60));
-                setEndTime(Math.floor(Date.now() / 1000));
-                setShowDateRange(false);
-                break;
-            case "90":
-                setStartTime(Math.floor(Date.now() / 1000) - (90 * 24 * 60 * 60));
-                setEndTime(Math.floor(Date.now() / 1000));
-                setShowDateRange(false);
-                break;
-            case "custom":
-                setShowDateRange(true);
-                break;
-            default:
-                break;
-        }
-    }
 
     useEffect(() => {
         let ignore = false;
@@ -119,20 +85,8 @@ export default function InstanceSelector(props: { onMetricsFetch: (metrics: any[
                         </FormControl>
                     </Grid>
                     <Grid item xs={3}>
-                        <FormControl fullWidth> <InputLabel id="demo-simple-select-label">Reporting Period</InputLabel>   <Select label="Date Range"
-                            onChange={handleSelectChange}>
-                            <MenuItem value={"month"}>Last Month</MenuItem>
-                            <MenuItem value={"90"}>Last 90 Days</MenuItem>
-                            <MenuItem value={"custom"}>Custom Range</MenuItem>
-                        </Select>
-                        </FormControl>
+                        <ReportingPeriodSelector onStartTimeChange={(startTime: number) => setStartTime(startTime)} onEndTimeChange={(endTime: number) => setEndTime(endTime)} />
                     </Grid>
-                    {showDateRange && <Grid item>
-                        <DateTimePicker label="Start Date/Time" onAccept={handleStartDateChagnge} />
-                    </Grid>}
-                    {showDateRange && <Grid item>
-                        <DateTimePicker label="End Date/Time" onAccept={handleEndDateChagnge} />
-                    </Grid>}
                 </Grid>
             </Box >
             <Box className="ReportingButton">

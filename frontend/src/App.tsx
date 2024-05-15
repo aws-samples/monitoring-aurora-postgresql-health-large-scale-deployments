@@ -9,6 +9,7 @@ import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import BasicCard from './Card';
 import { Grid } from '@mui/material';
+import Dashboard from './Dashboard';
 
 function App() {
   return (
@@ -16,7 +17,7 @@ function App() {
       <AppBar position="static">
         <Toolbar>
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            Buffer Cache Hit Ratio - Visualizer
+            Aurora Performance Visualizer
           </Typography>
         </Toolbar>
       </AppBar>
@@ -24,15 +25,16 @@ function App() {
         <Grid xs={8}>
           <Box className="Box">
             <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <CacheMetrics />
+              {/* <CacheMetrics /> */}
+              <Dashboard />
             </LocalizationProvider>
           </Box>
         </Grid>
-        <Grid xs={4}>
+        {/* <Grid xs={4}>
           <Box className="Box">
             <BasicCard />
           </Box>
-        </Grid>
+        </Grid> */}
       </Grid>
     </div>
   );
