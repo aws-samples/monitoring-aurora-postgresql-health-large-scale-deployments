@@ -25,8 +25,8 @@ function App() {
         <Grid xs={8}>
           <Box className="Box">
             <LocalizationProvider dateAdapter={AdapterDayjs}>
-              {/* <CacheMetrics /> */}
-              <Dashboard />
+              <CacheMetrics />
+              {/* <Dashboard /> */}
             </LocalizationProvider>
           </Box>
         </Grid>
