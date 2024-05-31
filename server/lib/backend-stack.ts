@@ -170,8 +170,9 @@ export class BackendStack extends cdk.Stack {
 
   private createDynamoDb() {
     const dynamoDb = new cdk.aws_dynamodb.Table(this, 'VisualizerMetrics', {
-      tableName: 'VisualizerMetrics',
+      tableName: 'VisualizerMetricsDb',
       partitionKey: { name: 'InstanceId', type: cdk.aws_dynamodb.AttributeType.STRING },
+      sortKey: { name: 'DateHourTimeZone', type: cdk.aws_dynamodb.AttributeType.NUMBER },
       readCapacity: 5,
       writeCapacity: 5,
       removalPolicy: cdk.RemovalPolicy.DESTROY

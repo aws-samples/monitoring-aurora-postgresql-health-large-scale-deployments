@@ -62,16 +62,28 @@ const queryTableForAllInstances = async (startTimeEpoch: string, endTimeEpoch: s
         };
     }
     let keyConditionExpression = 'DateHourTimeZone BETWEEN :startTimeEpoch AND :endTimeEpoch'
-    let params: AWS.DynamoDB.DocumentClient.QueryInput = {
+    // let params: AWS.DynamoDB.DocumentClient.QueryInput = {
+    //     TableName: process.env.DYNAMODB_TABLE_NAME,
+    //     KeyConditionExpression: keyConditionExpression,
+    //     ProjectionExpression: 'MetricValueAverage, DateHourTimeZone, InstanceId, MetricName',
+    //     ExpressionAttributeValues: {
+    //         ':startTimeEpoch': parseInt(startTimeEpoch),
+    //         ':endTimeEpoch': parseInt(endTimeEpoch)
+    //     },
+    //     IndexName: 'DateHourTimeZone-index'
+    // }
+    const params: AWS.DynamoDB.DocumentClient.ScanInput = {
         TableName: process.env.DYNAMODB_TABLE_NAME,
-        KeyConditionExpression: keyConditionExpression,
         ProjectionExpression: 'MetricValueAverage, DateHourTimeZone, InstanceId, MetricName',
+        FilterExpression: keyConditionExpression,
         ExpressionAttributeValues: {
             ':startTimeEpoch': parseInt(startTimeEpoch),
             ':endTimeEpoch': parseInt(endTimeEpoch)
-        }
-    }
-    const result = await dynamodb.query(params).promise();
+        },
+        IndexName: 'DateHourTimeZone-index'
+    };
+    console.log(params);
+    const result = await dynamodb.scan(params).promise();
     return result.Items
 }
 
@@ -106,6 +118,7 @@ const queryTableByInstanceId = async (instanceId: string, startTimeEpoch: string
             ProjectionExpression: 'InstanceId, MetricName, MetricValueAverage, DateHourTimeZone',
         }
     }
+    console.log(params);
     const result = await dynamodb.query(params).promise();
     return result.Items
 }
@@ -133,10 +146,10 @@ export const handler = async (event: APIGatewayEvent) => {
                 break;
             case "/query-all":
                 let result;
-                if(event.queryStringParameters?.instanceId)
-                result = await queryTableByInstanceId(event.queryStringParameters?.instanceId || '', event.queryStringParameters?.startTimeEpoch || '', event.queryStringParameters?.endTimeEpoch || '', event.queryStringParameters?.metricName || '');
-             else 
-                result = await queryTableForAllInstances(event.queryStringParameters?.startTimeEpoch || '', event.queryStringParameters?.endTimeEpoch || '');
+                if (event.queryStringParameters?.instanceId)
+                    result = await queryTableByInstanceId(event.queryStringParameters?.instanceId || '', event.queryStringParameters?.startTimeEpoch || '', event.queryStringParameters?.endTimeEpoch || '', event.queryStringParameters?.metricName || '');
+                else
+                    result = await queryTableForAllInstances(event.queryStringParameters?.startTimeEpoch || '', event.queryStringParameters?.endTimeEpoch || '');
                 return sendSuccessResponse(JSON.stringify(result));
                 break;
             case "/metricslist":
