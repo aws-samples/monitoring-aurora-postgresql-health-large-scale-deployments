@@ -14,7 +14,7 @@
     "@types/aws-lambda": "^8.10.136",
     "@types/chai": "^4.3.11",
     "@types/jest": "^29.5.5",
-    "@types/node": "^20.7.1",
+    "@types/node": "^20.12.13",
     "aws-cdk": "2.101.1",
     "chai": "^5.1.0",
     "esbuild": "^0.20.1",

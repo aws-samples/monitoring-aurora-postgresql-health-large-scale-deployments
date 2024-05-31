@@ -3,8 +3,8 @@
   "sourceIp": "173.71.123.159",
   "metricsTracked": [
     {
-      "name": "VolumeReadIOPS",
-      "threshold": 90,
+      "name": "FreeableMemory",
+      "threshold": 70,
       "thresholdOperator": "<="
     },
     {

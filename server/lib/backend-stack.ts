@@ -28,8 +28,6 @@ export class BackendStack extends cdk.Stack {
   private sourceIp = '';
   constructor(app: Construct, id: string, props: MyStackProps) {
     super(app, id, props);
-    const vpc = this.createVpc();
-    this.createRdsClusters(vpc);
     const table = this.createDynamoDb();
     this.scheduleDuration = props.scheduleDuration;
     this.sourceIp = props.sourceIp;
@@ -171,8 +169,8 @@ export class BackendStack extends cdk.Stack {
   }
 
   private createDynamoDb() {
-    const dynamoDb = new cdk.aws_dynamodb.Table(this, 'CacheHitRatioMetrics', {
-      tableName: 'CacheHitRatioMetrics',
+    const dynamoDb = new cdk.aws_dynamodb.Table(this, 'VisualizerMetrics', {
+      tableName: 'VisualizerMetrics',
       partitionKey: { name: 'InstanceId', type: cdk.aws_dynamodb.AttributeType.STRING },
       readCapacity: 5,
       writeCapacity: 5,
@@ -197,76 +195,4 @@ export class BackendStack extends cdk.Stack {
     return dynamoDb;
   }
 
-  private createRdsClusters(vpc: cdk.aws_ec2.Vpc) {
-    const cluster02 = new rds.DatabaseCluster(this, 'AuroraCluster02', {
-      clusterIdentifier: 'AuroraCluster02',
-      engine: rds.DatabaseClusterEngine.auroraPostgres({ version: rds.AuroraPostgresEngineVersion.VER_15_2 }),
-      writer: rds.ClusterInstance.provisioned('writer', {
-        publiclyAccessible: false,
-      }),
-      readers: [
-        rds.ClusterInstance.provisioned('reader1', { promotionTier: 1 }),
-        rds.ClusterInstance.serverlessV2('reader2'),
-      ],
-      defaultDatabaseName: 'mydb02',
-      vpcSubnets: {
-        subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
-      },
-      vpc,
-      storageEncrypted: true
-    });
-    const cluster01 = new rds.DatabaseCluster(this, 'AuroraCluster01', {
-      clusterIdentifier: 'AuroraCluster01',
-      engine: rds.DatabaseClusterEngine.auroraPostgres({ version: rds.AuroraPostgresEngineVersion.VER_15_2 }),
-      writer: rds.ClusterInstance.provisioned('writer', {
-        publiclyAccessible: false,
-      }),
-      readers: [
-        rds.ClusterInstance.provisioned('reader1', { promotionTier: 1 }),
-        rds.ClusterInstance.serverlessV2('reader2'),
-      ],
-      defaultDatabaseName: 'mydb01',
-      vpcSubnets: {
-        subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
-      },
-      vpc,
-      storageEncrypted: true
-    });
-    const cluster03 = new rds.DatabaseCluster(this, 'AuroraCluster03', {
-      clusterIdentifier: 'AuroraCluster03',
-      engine: rds.DatabaseClusterEngine.auroraPostgres({ version: rds.AuroraPostgresEngineVersion.VER_15_2 }),
-      writer: rds.ClusterInstance.provisioned('writer', {
-        publiclyAccessible: false,
-      }),
-      readers: [
-        rds.ClusterInstance.provisioned('reader1', { promotionTier: 1 }),
-        rds.ClusterInstance.serverlessV2('reader2'),
-      ],
-      defaultDatabaseName: 'mydb03',
-      vpcSubnets: {
-        subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
-      },
-      vpc,
-      storageEncrypted: true
-    });
-  }
-
-  private createVpc() {
-    return new ec2.Vpc(this, 'Vpc', {
-      ipAddresses: ec2.IpAddresses.cidr('10.0.0.0/16'),
-      maxAzs: 2,
-      subnetConfiguration: [
-        {
-          cidrMask: 24,
-          name: 'public01',
-          subnetType: ec2.SubnetType.PUBLIC,
-        },
-        {
-          cidrMask: 24,
-          name: 'private01',
-          subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
-        },
-      ],
-    });
-  }
 }
