@@ -1,12 +1,11 @@
 import {
     AppLayout,
-    ContentLayout,
-    Header,
-    Link
+    SplitPanel
 } from '@cloudscape-design/components';
 import { I18nProvider } from '@cloudscape-design/components/i18n';
 import messages from '@cloudscape-design/components/i18n/messages/all.en';
-import SideNavigation from '@cloudscape-design/components/side-navigation';
+import { useState } from 'react';
+import CloudWatcher from '../../pages/CloudWatcher';
 import TopNavbar from '../topNavbar/TopNavbar';
 
 const LOCALE = 'en';
@@ -21,42 +20,33 @@ const appLayoutLabels = {
     toolsClose: "Close help panel",
 };
 
-interface ILayoutProps {
-    children: React.ReactNode;
-}
 
-const Layout = ({ children }: ILayoutProps) => {
+const Layout = () => {
+
+    const [splitPanelOpen, setSplitPanelOpen] = useState<string>();
+
+
     return (
         <I18nProvider locale={LOCALE} messages={[messages]}>
             <TopNavbar />
             <AppLayout
                 content={
-                    <ContentLayout
-                        header={
-                            <Header variant="h1" info={<Link variant="info">Info</Link>}>
-                                Aurora Cloud Watch Visualizer
-                            </Header>
-                        }
-                    >
-                        {children}
-                        {/* <Container
-                            header={
-                                <Header variant="h2" description="Container description">
-                                    Container header
-                                </Header>
-                            }
-                        >
-                        </Container> */}
-                    </ContentLayout>
+                    <CloudWatcher setSidePanel={setSplitPanelOpen} />
                 }
                 headerSelector="#h"
-                navigation={
-                    <SideNavigation items={[
-                        { type: 'link', text: 'Dashboard', href: '/' }
-                    ]} activeHref='#/' />
-                }
                 ariaLabels={appLayoutLabels}
-                toolsHide
+                splitPanelPreferences={{ position: 'side' }}
+                splitPanelOpen={splitPanelOpen ? true : false}
+                onSplitPanelToggle={() => setSplitPanelOpen(undefined)}
+                splitPanelSize={360}
+                toolsHide={true}
+                navigationHide={true}
+                splitPanel={
+                    <SplitPanel header="Info" closeBehavior="hide" hidePreferencesButton={true}>
+                        <>{splitPanelOpen}</>
+                    </SplitPanel>
+                }
+
             />
         </I18nProvider>
     );

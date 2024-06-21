@@ -1,12 +1,13 @@
 import { Route, Routes } from "react-router-dom";
 import Dashboard from "../dashboard/Dashboard";
+import MetricsTable from "../metricsTable/metricsTable";
 
 export const allRoutes: Record<
     string,
     { title: string; element: JSX.Element }
 > = {
     "/": {
-        title: "Outbound Tracker",
+        title: "Dashboard",
         element: <Dashboard />,
     },
     "/dashboard": {
@@ -15,7 +16,7 @@ export const allRoutes: Record<
     },
     "/overview": {
         title: "Watcher",
-        element: <>overview</>,
+        element: <MetricsTable />,
     },
 };
 

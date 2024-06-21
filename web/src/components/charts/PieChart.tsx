@@ -5,10 +5,11 @@ import { metric } from "../dashboard/Dashboard";
 
 
 interface IDashboardPieChartProps {
-    metric: metric
+    metric: metric,
+    setShowTable: (value: boolean) => void
 }
 
-const DashboardPieChart = ({ metric }: IDashboardPieChartProps) => {
+const DashboardPieChart = ({ setShowTable }: IDashboardPieChartProps) => {
     return (
         <PieChart
             data={[
@@ -25,7 +26,7 @@ const DashboardPieChart = ({ metric }: IDashboardPieChartProps) => {
 
             ]}
             detailPopoverContent={(datum, sum) => [
-                { key: "Resource count", value: <a href="/overview">{datum.value}</a> },
+                { key: "Resource count", value: <a href="" onClick={() => setShowTable(true)}>{datum.value}</a> },
                 {
                     key: "Percentage",
                     value: `${((datum.value / sum) * 100).toFixed(
