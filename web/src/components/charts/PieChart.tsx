@@ -1,39 +1,42 @@
 import Box from "@cloudscape-design/components/box";
 import Button from "@cloudscape-design/components/button";
 import PieChart from "@cloudscape-design/components/pie-chart";
-import { metric } from "../dashboard/Dashboard";
+import {
+    colorChartsStatusHigh,
+    colorChartsStatusPositive
+} from '@cloudscape-design/design-tokens';
+import { MetricInfo } from "../../model/model";
 
+
+const pieChartColorMapping: { [key: string]: string } = {
+    "Healthy Instances": colorChartsStatusPositive,
+    'Unhealthy Instances': colorChartsStatusHigh
+};
 
 interface IDashboardPieChartProps {
-    metric: metric,
-    setShowTable: (value: boolean) => void
+    metricSummary: MetricInfo[],
+    metricName: string,
+    setSelectedMetricName: (value: string) => void
 }
 
-const DashboardPieChart = ({ setShowTable }: IDashboardPieChartProps) => {
+const DashboardPieChart = ({ metricSummary, metricName, setSelectedMetricName }: IDashboardPieChartProps) => {
+    metricSummary = metricSummary.map((metric) => {
+        return {
+            ...metric,
+            color: pieChartColorMapping[metric.title]
+        }
+    })
     return (
         <PieChart
-            data={[
-                {
-                    title: "Under threshold",
-                    value: 60,
-                    lastUpdate: "Dec 7, 2020"
-                },
-                {
-                    title: "Above threshold",
-                    value: 30,
-                    lastUpdate: "Dec 6, 2020"
-                },
-
-            ]}
+            data={metricSummary}
             detailPopoverContent={(datum, sum) => [
-                { key: "Resource count", value: <a href="" onClick={() => setShowTable(true)}>{datum.value}</a> },
+                { key: "Resource count", value: <a href="#" onClick={() => { setSelectedMetricName(metricName); return false; }}>{datum.value}</a> },
                 {
                     key: "Percentage",
                     value: `${((datum.value / sum) * 100).toFixed(
                         0
                     )}%`
-                },
-                { key: "Last update on", value: datum.lastUpdate }
+                }
             ]}
             segmentDescription={(datum, sum) =>
                 `${datum.value} units, ${(

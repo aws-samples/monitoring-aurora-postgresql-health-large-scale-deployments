@@ -1,8 +1,32 @@
-import { Box, Header, Link, SpaceBetween, Table } from "@cloudscape-design/components";
-import { mockData } from "../../mock/mockData";
-import { IPageProps } from "../dashboard/Dashboard";
+import { Box, DateRangePickerProps, Header, Link, SpaceBetween, Spinner, Table } from "@cloudscape-design/components";
+import { useEffect, useState } from "react";
+import { useMetricsDetails } from "../../hooks/use-metric-details";
+import { MetricItem } from "../../model/model";
 
-const MetricsTable = ({ setSidePanel }: IPageProps) => {
+
+interface IMetricDetailsProps {
+    metricName: string,
+    setSidePanel: (value: string) => void,
+    dateRange: DateRangePickerProps.RelativeValue
+}
+
+const MetricsTable = ({ setSidePanel, dateRange, metricName }: IMetricDetailsProps) => {
+
+    const [metricsDetails, setMetrcisDetails] = useState<MetricItem[]>([]);
+    const { data: metricItems, isLoading, error } = useMetricsDetails(dateRange, metricName);
+
+    useEffect(() => {
+        setMetrcisDetails(metricItems as MetricItem[])
+    }, [metricItems]);
+
+    if (isLoading) {
+        return <Spinner />;
+    }
+
+    if (error) {
+        return <div>Error: {error.message}</div>
+    }
+
     return (
         <Table
             renderAriaLive={({
@@ -41,7 +65,7 @@ const MetricsTable = ({ setSidePanel }: IPageProps) => {
                 }
             ]}
             enableKeyboardNavigation
-            items={mockData}
+            items={metricsDetails}
             loadingText="Loading resources"
             sortingDisabled
             empty={

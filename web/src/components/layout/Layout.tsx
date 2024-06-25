@@ -4,7 +4,9 @@ import {
 } from '@cloudscape-design/components';
 import { I18nProvider } from '@cloudscape-design/components/i18n';
 import messages from '@cloudscape-design/components/i18n/messages/all.en';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { useState } from 'react';
+import { queryClient } from '../../api/query-client';
 import CloudWatcher from '../../pages/CloudWatcher';
 import TopNavbar from '../topNavbar/TopNavbar';
 
@@ -28,6 +30,7 @@ const Layout = () => {
 
     return (
         <I18nProvider locale={LOCALE} messages={[messages]}>
+            <QueryClientProvider client={queryClient}>
             <TopNavbar />
             <AppLayout
                 content={
@@ -48,6 +51,7 @@ const Layout = () => {
                 }
 
             />
+            </QueryClientProvider>
         </I18nProvider>
     );
 }

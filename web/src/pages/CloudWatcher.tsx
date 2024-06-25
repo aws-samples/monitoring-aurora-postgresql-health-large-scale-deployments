@@ -1,7 +1,9 @@
-import { Button, ContentLayout, DateRangePicker, Header } from "@cloudscape-design/components";
+import { Button, ContentLayout, DateRangePickerProps, Header } from "@cloudscape-design/components";
 import { useState } from "react";
 import Dashboard from "../components/dashboard/Dashboard";
+import RelativeDateRangePicker from "../components/dateRange/DateRange";
 import MetricsTable from "../components/metricsTable/MetricsTable";
+import { DEFAULT_DATE_FILTER } from "../constant";
 
 export interface ICloudWatcherProps {
     setSidePanel: (value: string) => void,
@@ -9,7 +11,9 @@ export interface ICloudWatcherProps {
 
 const CloudWatcher = ({ setSidePanel }: ICloudWatcherProps) => {
 
-    const [showDashboard, setShowDashboard] = useState<boolean>(false);
+    const [selectedMetricName, setSelectedMetricName] = useState<string | undefined>(undefined);
+    const [dateRangeFilter, setDateRangeFilter] = useState<DateRangePickerProps.RelativeValue>(DEFAULT_DATE_FILTER);
+
     return (
         <ContentLayout
             header={
@@ -18,12 +22,17 @@ const CloudWatcher = ({ setSidePanel }: ICloudWatcherProps) => {
                 </Header>
             }
         >
-            <h3>Date Range filter</h3>
-            <DateRangePicker />
+            {selectedMetricName && <Button iconName="arrow-left" variant="icon" onClick={() => setSelectedMetricName(undefined)} />}
             <br />
-            {showDashboard && <Dashboard setSidePanel={setSidePanel} setShowTable={setShowDashboard} />}
-            {!showDashboard && <Button iconName="arrow-left" variant="icon" onClick={() => setShowDashboard(true)} />}
-            {!showDashboard && <MetricsTable setSidePanel={setSidePanel} setShowTable={setShowDashboard} />}
+            <h3>Date Range filter</h3>
+            <RelativeDateRangePicker value={dateRangeFilter} setValue={setDateRangeFilter} />
+            <br />
+            {!selectedMetricName && <Dashboard setSidePanel={setSidePanel} dateRange={dateRangeFilter} setSelectedMetricName={setSelectedMetricName} />}
+
+            {selectedMetricName && <MetricsTable setSidePanel={setSidePanel} dateRange={dateRangeFilter} metricName={selectedMetricName} />}
+            <p>
+                <li>Some instructions</li>
+            </p>
         </ContentLayout>
     )
 }
