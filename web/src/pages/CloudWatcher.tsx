@@ -3,7 +3,7 @@ import { useState } from "react";
 import Dashboard from "../components/dashboard/Dashboard";
 import RelativeDateRangePicker from "../components/dateRange/DateRange";
 import MetricsTable from "../components/metricsTable/MetricsTable";
-import { DEFAULT_DATE_FILTER } from "../constant";
+import { APP_NAME, DEFAULT_DATE_FILTER } from "../constant";
 
 export interface ICloudWatcherProps {
     setSidePanel: (value: string) => void,
@@ -18,7 +18,7 @@ const CloudWatcher = ({ setSidePanel }: ICloudWatcherProps) => {
         <ContentLayout
             header={
                 <Header variant="h1">
-                    Aurora Cloud Watch Visualizer
+                    {APP_NAME}
                 </Header>
             }
         >

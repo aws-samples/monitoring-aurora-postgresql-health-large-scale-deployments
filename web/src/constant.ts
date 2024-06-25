@@ -6,3 +6,5 @@ export const DEFAULT_DATE_FILTER: DateRangePickerProps.RelativeValue = {
     amount: 90,
     unit: "minute"
 }
+
+export const APP_NAME = "AuroraHealth";

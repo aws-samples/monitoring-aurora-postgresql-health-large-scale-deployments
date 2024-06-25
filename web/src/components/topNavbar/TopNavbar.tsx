@@ -1,16 +1,25 @@
 import TopNavigation from '@cloudscape-design/components/top-navigation';
-import logo from '../../logo/awslogo.svg';
+import { APP_NAME } from '../../constant';
+import logo from '../../logo/logo.svg';
+const i18nStrings = {
+	searchIconAriaLabel: 'Search',
+	searchDismissIconAriaLabel: 'Close search',
+	overflowMenuTriggerText: 'More',
+	overflowMenuTitleText: 'All',
+	overflowMenuBackIconAriaLabel: 'Back',
+	overflowMenuDismissIconAriaLabel: 'Close menu',
+};
 
-
-function TopNavbar() {
+const TopNavbar = () => {
 	return (
 		<TopNavigation
+			i18nStrings={i18nStrings}
 			identity={{
 				href: '#',
-				title: 'Aurora Cloud Watch Visualizer',
+				title: APP_NAME,
 				logo: {
 					src: logo,
-					alt: 'Service',
+					alt: APP_NAME,
 				},
 			}}
 		/>
