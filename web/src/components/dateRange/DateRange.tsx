@@ -22,21 +22,21 @@ const RelativeDateRangePicker = ({ value, setValue }: IDateRangeProps) => {
             isValidRange={() => ({ valid: true })}
             relativeOptions={[
                 {
-                    key: "previous-90-minutes",
+                    key: "previous-90-days",
                     amount: 90,
-                    unit: "minute",
+                    unit: "day",
                     type: "relative"
                 },
                 {
-                    key: "previous-30-minutes",
+                    key: "previous-30-days",
                     amount: 30,
-                    unit: "minute",
+                    unit: "day",
                     type: "relative"
                 },
                 {
-                    key: "previous-15-minutes",
-                    amount: 15,
-                    unit: "minute",
+                    key: "previous-7-days",
+                    amount: 7,
+                    unit: "day",
                     type: "relative"
                 }
             ]}

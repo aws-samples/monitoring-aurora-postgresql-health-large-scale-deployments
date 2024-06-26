@@ -15,13 +15,7 @@ const CloudWatcher = ({ setSidePanel }: ICloudWatcherProps) => {
     const [dateRangeFilter, setDateRangeFilter] = useState<DateRangePickerProps.RelativeValue>(DEFAULT_DATE_FILTER);
 
     return (
-        <ContentLayout
-            header={
-                <Header variant="h1">
-                    {APP_NAME}
-                </Header>
-            }
-        >
+        <ContentLayout>
             {selectedMetricName && <Button iconName="arrow-left" variant="icon" onClick={() => setSelectedMetricName(undefined)} />}
             <br />
             <h3>Date Range filter</h3>
