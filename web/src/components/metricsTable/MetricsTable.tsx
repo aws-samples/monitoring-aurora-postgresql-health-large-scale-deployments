@@ -7,13 +7,13 @@ import { MetricItem } from "../../model/model";
 interface IMetricDetailsProps {
     metricName: string,
     setSidePanel: (value: string) => void,
-    dateRange: DateRangePickerProps.RelativeValue
+    dateRange: DateRangePickerProps.Value
 }
 
 const MetricsTable = ({ setSidePanel, dateRange, metricName }: IMetricDetailsProps) => {
 
     const [metricsDetails, setMetrcisDetails] = useState<MetricItem[]>([]);
-    const { data: metricItems, isLoading, error } = useMetricsDetails(dateRange, metricName);
+    const { data: metricItems, isLoading, error } = useMetricsDetails(dateRange as DateRangePickerProps.RelativeValue, metricName);
 
     useEffect(() => {
         setMetrcisDetails(metricItems as MetricItem[])

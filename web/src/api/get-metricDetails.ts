@@ -6,7 +6,6 @@ import { getCurrentEpochTime, getRangeStartAsEpoc } from './utils/utils';
 
 export const getMetricDetails = async (range: DateRangePickerProps.RelativeValue, metricName: string): Promise<unknown> => {
     try {
-
         const path = `metricsdetails?starttime=${getRangeStartAsEpoc(range.amount, range.unit)}&endtime=${getCurrentEpochTime()}&metricName=${metricName}`
         // const restOperation = get({
         //     apiName: 'myRestApi',

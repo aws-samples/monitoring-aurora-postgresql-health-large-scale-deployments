@@ -1,3 +1,5 @@
+import { DateRangePickerProps } from "@cloudscape-design/components";
+
 export const getRangeStartAsEpoc = (range: number, unit = 'minutes') => {
     const currentEpochTime = getCurrentEpochTime();
     switch (unit) {
@@ -27,3 +29,7 @@ export const getCurrentEpochTime = (): number => {
 export const wait = async (ms: number = 500) => {
     return new Promise((resolve) => setTimeout(resolve, ms));
 };
+
+export const isRelativeValue = (value: DateRangePickerProps.Value): value is DateRangePickerProps.RelativeValue => {
+    return (value as DateRangePickerProps.RelativeValue).type === 'relative';
+}

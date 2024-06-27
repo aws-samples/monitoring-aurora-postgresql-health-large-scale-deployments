@@ -8,7 +8,7 @@ import DashboardPieChart from "../charts/PieChart";
 
 
 export interface IPageProps extends ICloudWatcherProps {
-    dateRange: DateRangePickerProps.RelativeValue,
+    dateRange: DateRangePickerProps.Value,
     setSelectedMetricName: (value: string) => void
 }
 
@@ -18,7 +18,7 @@ const Dashboard = ({ setSidePanel, dateRange, setSelectedMetricName }: IPageProp
     const [metricsConfig, setMetricsConfig] = useState<MetricConfig[]>();
 
     const { data: metricsInfo } = useMetricsConfig();
-    const { data: metricsSummary, isLoading: isSummaryLoading, error: summaryError } = useMetricsSummary(dateRange);
+    const { data: metricsSummary, isLoading: isSummaryLoading, error: summaryError } = useMetricsSummary(dateRange as DateRangePickerProps.RelativeValue);
 
     useEffect(() => {
         setMetricsConfig(metricsInfo as MetricConfig[])

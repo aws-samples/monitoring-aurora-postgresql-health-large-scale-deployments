@@ -12,7 +12,7 @@ export interface ICloudWatcherProps {
 const CloudWatcher = ({ setSidePanel }: ICloudWatcherProps) => {
 
     const [selectedMetricName, setSelectedMetricName] = useState<string | undefined>(undefined);
-    const [dateRangeFilter, setDateRangeFilter] = useState<DateRangePickerProps.RelativeValue>(DEFAULT_DATE_FILTER);
+    const [dateRangeFilter, setDateRangeFilter] = useState<DateRangePickerProps.Value>(DEFAULT_DATE_FILTER);
 
     return (
         <ContentLayout>
