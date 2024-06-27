@@ -8,7 +8,9 @@
     "build": "tsc",
     "watch": "tsc -w",
     "test": "jest",
-    "cdk": "cdk"
+    "cdk": "cdk",
+    "buildweb": "cd ../web && npm run build",
+    "deploy": "npm run buildweb && cdk deploy"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.136",

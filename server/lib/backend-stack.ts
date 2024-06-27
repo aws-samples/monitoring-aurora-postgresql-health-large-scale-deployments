@@ -10,6 +10,7 @@ import path from 'path';
 import { Cors } from 'aws-cdk-lib/aws-apigateway';
 import { AnyPrincipal } from 'aws-cdk-lib/aws-iam';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
+import WebDeployer from './webdeployer';
 
 interface MyStackProps extends cdk.StackProps {
   scheduleDuration: number;
@@ -26,6 +27,7 @@ type MetricConfig = {
 export class BackendStack extends cdk.Stack {
   private scheduleDuration = 1;
   private sourceIp = '';
+  private webDeployer: WebDeployer;
   constructor(app: Construct, id: string, props: MyStackProps) {
     super(app, id, props);
     const vpc = this.createVpc();
@@ -38,6 +40,8 @@ export class BackendStack extends cdk.Stack {
     this.createEventBridge(app, backendLambda);
     const queryLambda = this.createQueryLambda(table, metricsTracked);
     this.createApiGateway(table, queryLambda);
+    this.webDeployer = new WebDeployer(this);
+    this.webDeployer.deploy();
   }
 
   //Upload the Metrics Tracked to Paramter store in AWS

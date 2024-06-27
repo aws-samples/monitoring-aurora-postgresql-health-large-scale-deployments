@@ -1,6 +1,5 @@
 import TopNavigation from '@cloudscape-design/components/top-navigation';
 import { APP_NAME } from '../../constant';
-import logo from '../../logo/logo.svg';
 const i18nStrings = {
 	searchIconAriaLabel: 'Search',
 	searchDismissIconAriaLabel: 'Close search',
@@ -16,11 +15,7 @@ const TopNavbar = () => {
 			i18nStrings={i18nStrings}
 			identity={{
 				href: '#',
-				title: APP_NAME,
-				logo: {
-					src: logo,
-					alt: APP_NAME,
-				},
+				title: APP_NAME
 			}}
 		/>
 	);
