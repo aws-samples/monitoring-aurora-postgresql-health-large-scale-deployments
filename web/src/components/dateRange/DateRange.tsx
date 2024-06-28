@@ -1,13 +1,10 @@
 import DateRangePicker, { DateRangePickerProps } from "@cloudscape-design/components/date-range-picker";
 import { DEFAULT_DATE_FILTER } from "../../constant";
+import { NonCancelableCustomEvent } from "@cloudscape-design/components";
 
 interface IDateRangeProps {
     value: DateRangePickerProps.Value,
     setValue: (value: DateRangePickerProps.Value) => void,
-}
-// Define the CustomEventStub interface
-interface CustomEventStub<T = unknown> extends CustomEvent {
-    detail: T;
 }
 
 const RelativeDateRangePicker = ({ value, setValue }: IDateRangeProps) => {
@@ -15,8 +12,7 @@ const RelativeDateRangePicker = ({ value, setValue }: IDateRangeProps) => {
     return (
         <DateRangePicker
             value={value}
-            onChange={(changeDetail: CustomEventStub<DateRangePickerProps.ChangeDetail>) => {
-
+            onChange={(changeDetail: NonCancelableCustomEvent<DateRangePickerProps.ChangeDetail>) => {
                 if (changeDetail && changeDetail.detail && changeDetail.detail.value) {
                     setValue(changeDetail.detail.value)
                 } else {

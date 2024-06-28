@@ -4,7 +4,7 @@ import { S3Origin } from "aws-cdk-lib/aws-cloudfront-origins";
 import { BlockPublicAccess, Bucket } from "aws-cdk-lib/aws-s3";
 import { BucketDeployment, Source } from "aws-cdk-lib/aws-s3-deployment";
 
-const path = '../web/build'
+const path = '../web/dist'
 
 export default class WebDeployer {
     private scope: cdk.Stack;
