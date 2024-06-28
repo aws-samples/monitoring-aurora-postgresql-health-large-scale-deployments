@@ -1,92 +1,40 @@
 import { GetParameterCommand, SSMClient } from '@aws-sdk/client-ssm';
 import { APIGatewayEvent } from 'aws-lambda';
 import { DynamoDB } from 'aws-sdk';
-
+import { listAuroraPostgreSQLInstanceIds } from './listAuroraPostgreSQLInstanceIds';
 
 // Create DynamoDB document client
 const dynamodb = new DynamoDB.DocumentClient();
 
-const scanTableAndExtractUniqueInstanceIds = async () => {
-    const tableName = process.env.DYNAMODB_TABLE_NAME
-    if (!tableName) {
-        throw new Error('DynamoDB table name not specified');
+async function getMetricsTracked() {
+    const client = new SSMClient();
+    const command = new GetParameterCommand({ Name: process.env.METRICS_TRACKED });
+    const ssmResponse = await client.send(command);
+    const metricsTracked = JSON.parse(ssmResponse.Parameter?.Value || '');
+    return metricsTracked;
+}
+
+const queryTableByMetricsName = async (metricName: string, startTimeEpoch: string, endTimeEpoch: string, count: boolean) => {
+    console.log(metricName, startTimeEpoch, endTimeEpoch);
+    if (!metricName || !process.env.DYNAMODB_TABLE_NAME || !startTimeEpoch || !endTimeEpoch) {
+        throw new Error('Missing required parameters');
     }
-    const params: AWS.DynamoDB.DocumentClient.ScanInput = {
-        TableName: tableName,
-        ProjectionExpression: 'InstanceId' // specify the field to project
-    };
-
-    const uniqueValues: Set<string> = new Set();
-
-    try {
-        // Scan DynamoDB table
-        const scanResult = await dynamodb.scan(params).promise();
-
-        // Extract and add unique values from scanned items
-        scanResult.Items?.forEach((item) => {
-            if (item.InstanceId) {
-                uniqueValues.add(item.InstanceId as string);
-            }
-        });
-
-        // If the result is paginated, continue scanning
-        let lastEvaluatedKey = scanResult.LastEvaluatedKey;
-        while (lastEvaluatedKey) {
-            const paginatedParams: AWS.DynamoDB.DocumentClient.ScanInput = {
-                ...params,
-                ExclusiveStartKey: lastEvaluatedKey
-            };
-
-            const paginatedScanResult = await dynamodb.scan(paginatedParams).promise();
-            paginatedScanResult.Items?.forEach((item) => {
-                if (item.InstanceId) {
-                    uniqueValues.add(item.InstanceId as string);
-                }
-            });
-
-            lastEvaluatedKey = paginatedScanResult.LastEvaluatedKey;
-        }
-
-        return Array.from(uniqueValues);
-    } catch (error) {
-        console.error('Error scanning DynamoDB table:', error);
-        throw error;
-    }
-};
-
-//function to read querystring parameter instanceId and use it to query InstanceId field in dynamodb table CacheHitRatioMetrics and return matching results in json format
-const queryTableByInstanceId = async (instanceId: string, startTimeEpoch: string, endTimeEpoch: string, metricName: string) => {
-    console.log(instanceId, startTimeEpoch, endTimeEpoch);
-    if (!instanceId || !process.env.DYNAMODB_TABLE_NAME || !startTimeEpoch || !endTimeEpoch) {
-        return {
-            statusCode: 400,
-            body: 'InstanceId parameters or table name not specified'
-        };
-    }
-    let keyConditionExpression = 'InstanceId = :instanceId AND DateHourTimeZone BETWEEN :startTimeEpoch AND :endTimeEpoch'
+    let keyConditionExpression = 'MetricName = :metricName AND DateHourTimeZone BETWEEN :startTimeEpoch AND :endTimeEpoch'
     let params: AWS.DynamoDB.DocumentClient.QueryInput = {
         TableName: process.env.DYNAMODB_TABLE_NAME,
         KeyConditionExpression: keyConditionExpression,
-        ProjectionExpression: 'MetricValueAverage, DateHourTimeZone, InstanceId, MetricName',
         ExpressionAttributeValues: {
-            ':instanceId': instanceId,
+            ':metricName': metricName,
             ':startTimeEpoch': parseInt(startTimeEpoch),
             ':endTimeEpoch': parseInt(endTimeEpoch)
-        }
+        },
+        ProjectionExpression: 'InstanceId, MetricName, MetricValueAverage, DateHourTimeZone',
     };
-    if (metricName !== '') {
-        params = {
-            ...params,
-            ExpressionAttributeValues: {
-                ...params.ExpressionAttributeValues,
-                ':metricName': metricName
-            },
-            FilterExpression: 'MetricName = :metricName',
-            ProjectionExpression: 'InstanceId, MetricName, MetricValueAverage, DateHourTimeZone',
-        }
+    if(count) {
+        params.Select = 'COUNT';
     }
     const result = await dynamodb.query(params).promise();
-    return result.Items
+    return result;
 }
 
 const sendSuccessResponse = (response: string) => {
@@ -106,19 +54,24 @@ export const handler = async (event: APIGatewayEvent) => {
     console.log('Event:', event);
     try {
         switch (event.path) {
-            case "/query-all-instances":
-                const uniqueValues = await scanTableAndExtractUniqueInstanceIds();
-                return sendSuccessResponse(JSON.stringify(uniqueValues));
-                break;
             case "/query-all":
-                const result = await queryTableByInstanceId(event.queryStringParameters?.instanceId || '', event.queryStringParameters?.startTimeEpoch || '', event.queryStringParameters?.endTimeEpoch || '', event.queryStringParameters?.metricName || '');
-                return sendSuccessResponse(JSON.stringify(result));
+                const result = await queryTableByMetricsName(event.queryStringParameters?.metricName || '', event.queryStringParameters?.startTimeEpoch || '', event.queryStringParameters?.endTimeEpoch || '', event.queryStringParameters?.count ? true : false);
+                if (event.queryStringParameters?.count) {
+                    let healthyInstances = (await listAuroraPostgreSQLInstanceIds()).length - (result.Count || 0);
+                    //TODO - Remove this
+                    if (process.env.TEMP_RETURN_VALUE) {
+                        healthyInstances = parseInt(process.env.TEMP_RETURN_VALUE) - (result.Count || 0);
+                    }
+                    return sendSuccessResponse(JSON.stringify({
+                        metricName: event.queryStringParameters?.metricName,
+                        UnHealtyInstances: result.Count,
+                        HealthyInstances: healthyInstances
+                    }));
+                }
+                return sendSuccessResponse(JSON.stringify(result.Items));
                 break;
             case "/metricslist":
-                const client = new SSMClient();
-                const command = new GetParameterCommand({ Name: process.env.METRICS_TRACKED });
-                const ssmResponse = await client.send(command);
-                const metricsTracked = JSON.parse(ssmResponse.Parameter?.Value || '');
+                const metricsTracked = await getMetricsTracked();
                 return sendSuccessResponse(JSON.stringify(metricsTracked));
             default:
                 return {
@@ -143,6 +96,7 @@ export const handler = async (event: APIGatewayEvent) => {
         };
     }
 };
+
 
 
 

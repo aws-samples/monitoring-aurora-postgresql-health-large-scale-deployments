@@ -173,9 +173,9 @@ export class BackendStack extends cdk.Stack {
   }
 
   private createDynamoDb() {
-    const dynamoDb = new cdk.aws_dynamodb.Table(this, 'CacheHitRatioMetrics', {
-      tableName: 'CacheHitRatioMetrics',
-      partitionKey: { name: 'InstanceId', type: cdk.aws_dynamodb.AttributeType.STRING },
+    const dynamoDb = new cdk.aws_dynamodb.Table(this, 'aurorahealthmonitordb', {
+      tableName: 'aurorahealthmonitordb',
+      partitionKey: { name: 'MetricName', type: cdk.aws_dynamodb.AttributeType.STRING },
       sortKey: { name: 'DateHourTimeZone', type: cdk.aws_dynamodb.AttributeType.NUMBER },
       readCapacity: 5,
       writeCapacity: 5,

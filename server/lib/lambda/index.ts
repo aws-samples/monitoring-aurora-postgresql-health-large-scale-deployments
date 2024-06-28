@@ -1,8 +1,8 @@
 import { CloudWatch, StandardUnit, Statistic } from '@aws-sdk/client-cloudwatch';
 import { DynamoDB } from '@aws-sdk/client-dynamodb';
-import { RDS } from '@aws-sdk/client-rds';
 import { SSMClient, GetParameterCommand } from "@aws-sdk/client-ssm"
 import { EventBridgeHandler, EventBridgeEvent, Context, Callback } from 'aws-lambda';
+import { listAuroraPostgreSQLInstanceIds } from './listAuroraPostgreSQLInstanceIds';
 
 type MetricConfig = {
     name: string;
@@ -32,27 +32,10 @@ const getCloudWatchMetric = async (db_instance_id: string, metricConfig: MetricC
 }
 
 
-async function listAuroraPostgreSQLInstanceIds(): Promise<string[]> {
-    // Set up the RDS client
-    const rdsClient = new RDS();
-    try {
-        // Get the list of RDS clusters
-        const clusters = await rdsClient.describeDBClusters({});
-        const instanceIds: string[] = [];
-        clusters.DBClusters?.forEach(cluster => {
-            instanceIds.push(cluster.DBClusterIdentifier!);
-        }
-        );
-        return instanceIds;
-    } catch (error) {
-        console.error("Error:", error);
-        return [];
-    }
-}
-
 const iterateLogs = async (numberOfHours: number, metricsTracked: MetricConfig[]) => {
     const instanceIds = await listAuroraPostgreSQLInstanceIds();
     const initialTime = new Date();
+    //TODO - failure only if 6 hours
     for (let hour = numberOfHours; hour > 0; hour--) {
         const startTime = new Date();
         startTime.setHours(initialTime.getHours() - hour, 0, 0, 0);
@@ -66,6 +49,7 @@ const iterateLogs = async (numberOfHours: number, metricsTracked: MetricConfig[]
                 for (const dataPoint of dataPoints) {
                     const expression = `${dataPoint.Average}${metric.thresholdOperator}${metric.threshold}`
                     console.log(expression);
+                    //TODO - remove eval, either use Mathjs or expr-eval or something similar
                     if (dataPoint.Average && eval(`${dataPoint.Average}${metric.thresholdOperator}${metric.threshold}`)) {
                         const average = dataPoint.Average.toFixed(2);
                         const startTimeMs = startTime.getTime();
