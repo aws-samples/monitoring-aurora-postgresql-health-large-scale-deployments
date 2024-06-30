@@ -35,7 +35,7 @@ const getCloudWatchMetric = async (db_instance_id: string, metricConfig: MetricC
 const iterateLogs = async (numberOfHours: number, metricsTracked: MetricConfig[]) => {
     const instanceIds = await listAuroraPostgreSQLInstanceIds();
     const initialTime = new Date();
-    //TODO - failure only if 6 hours
+    //TODO - failure only if 6 hours constantly failed
     for (let hour = numberOfHours; hour > 0; hour--) {
         const startTime = new Date();
         startTime.setHours(initialTime.getHours() - hour, 0, 0, 0);

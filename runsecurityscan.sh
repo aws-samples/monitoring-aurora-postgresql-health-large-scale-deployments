@@ -1,5 +1,5 @@
 echo "Removing node_modules directory from frontend"
-rm -rf frontend/node_modules
+rm -rf web/node_modules
 echo "Removing node_modules directory from backend"
 rm -rf server/node_modules
 echo "Removing cdk.out directory from backend"
@@ -9,8 +9,8 @@ echo "Running backend scan"
 echo "Running frontend scan"
 ./run_codeguru_security.sh frontendscan frontend/  us-east-1
 echo "Restoring npm packages for frontend"
-cd frontend
+cd web
 npm install
-echo "Restoring npm packages for frontend"
+echo "Restoring npm packages for backend"
 cd ../server 
 npm install

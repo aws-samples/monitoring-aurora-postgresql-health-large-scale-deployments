@@ -1,29 +1,20 @@
 {
   "scheduleDurationInHours": 1,
-  "sourceIp": "173.71.123.159",
   "metricsTracked": [
     {
       "name": "VolumeReadIOPS",
       "threshold": 90,
-      "thresholdOperator": "<="
+      "thresholdOperator": ">="
     },
     {
       "name": "BufferCacheHitRatio",
-      "threshold": 100,
-      "thresholdOperator": ">="
+      "threshold": 90,
+      "thresholdOperator": "<="
     },
     {
       "name": "CPUUtilization",
-      "threshold": 90,
+      "threshold": 95,
       "thresholdOperator": ">="
     }
-  ],
-  "availability-zones:account=259847763656:region=us-east-1": [
-    "us-east-1a",
-    "us-east-1b",
-    "us-east-1c",
-    "us-east-1d",
-    "us-east-1e",
-    "us-east-1f"
   ]
 }
