@@ -1,23 +1,18 @@
 import { DateRangePickerProps } from '@cloudscape-design/components';
-import { ApiError } from 'aws-amplify/api';
-import { metricSummary } from './mock/mockData';
+import { ApiError, get } from 'aws-amplify/api';
 import { getCurrentEpochTime, getRangeStartAsEpoc } from './utils/utils';
 
 
-export const getMetricSummary = async (range: DateRangePickerProps.RelativeValue): Promise<unknown> => {
+export const getMetricSummary = async (range: DateRangePickerProps.RelativeValue, metricName: string): Promise<unknown> => {
     try {
-        const path = `summary?startDate=${getRangeStartAsEpoc(range.amount, range.unit)}&endDate=${getCurrentEpochTime()}`
-        // const restOperation = get({
-        //     apiName: 'myRestApi',
-        //     path: path
-        // });
-        // const { body } = await restOperation.response;
-        // return await body.json();
-
-
-        console.log('Fetching getMetricSummary using path = ', path);
-
-        return metricSummary;
+        //TODO - enddate should also come from date ux, not current date always
+        const path = `query-all?startTimeEpoch=${getRangeStartAsEpoc(range.amount, range.unit)}&endTimeEpoch=${getCurrentEpochTime()}&metricName=${metricName}&count=true`
+        const restOperation = get({
+            apiName: 'myRestApi',
+            path: path
+        });
+        const { body } = await restOperation.response;
+        return await body.json();
     } catch (error) {
         if (error instanceof ApiError) {
             if (error.response) {

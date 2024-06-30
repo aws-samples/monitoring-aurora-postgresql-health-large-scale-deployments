@@ -8,10 +8,12 @@ const path = '../web/dist'
 
 export default class WebDeployer {
     private scope: cdk.Stack;
-    constructor(stack: cdk.Stack) {
+    private apigateway: cdk.aws_apigateway.RestApi;
+    constructor(stack: cdk.Stack, apigateway: cdk.aws_apigateway.RestApi) {
         this.scope = stack;
+        this.apigateway = apigateway;
     }
-    
+
     deploy() {
         const hostingBucket = new Bucket(this.scope, 'FrontendBucket', {
             autoDeleteObjects: true,
@@ -37,7 +39,7 @@ export default class WebDeployer {
         })
 
         new BucketDeployment(this.scope, 'BucketDeployment', {
-            sources: [Source.asset(path)],
+            sources: [Source.asset(path), Source.jsonData('config.json', { API_URL: this.apigateway.url })],
             destinationBucket: hostingBucket,
             distribution,
             distributionPaths: ['/*'],

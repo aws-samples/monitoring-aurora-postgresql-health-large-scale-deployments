@@ -37,8 +37,8 @@ export class BackendStack extends cdk.Stack {
     const backendLambda = this.createBackendLambda(table, metricsTracked);
     this.createEventBridge(app, backendLambda);
     const queryLambda = this.createQueryLambda(table, metricsTracked);
-    this.createApiGateway(table, queryLambda);
-    this.webDeployer = new WebDeployer(this);
+    const apiGateway = this.createApiGateway(table, queryLambda);
+    this.webDeployer = new WebDeployer(this, apiGateway);
     this.webDeployer.deploy();
   }
 
@@ -105,12 +105,12 @@ export class BackendStack extends cdk.Stack {
     });
 
     const proxyIntegration = new apigateway.LambdaIntegration(lambda);
-    const proxyResource = apiGateway.root.addResource('query-all-instances');
-    proxyResource.addMethod('GET', proxyIntegration, { methodResponses: [{ statusCode: '200' }] })
     const proxyResource2 = apiGateway.root.addResource('query-all');
     proxyResource2.addMethod('GET', proxyIntegration, { methodResponses: [{ statusCode: '200' }] });
     const proxyResource3 = apiGateway.root.addResource('metricslist');
     proxyResource3.addMethod('GET', proxyIntegration, { methodResponses: [{ statusCode: '200' }] });
+
+    return apiGateway;
   }
 
   private createBackendLambda(table: cdk.aws_dynamodb.Table, metricsTracked: StringParameter) {

@@ -32,6 +32,7 @@ const queryTableByMetricsName = async (metricName: string, startTimeEpoch: strin
     };
     if(count) {
         params.Select = 'COUNT';
+        delete params.ProjectionExpression;
     }
     const result = await dynamodb.query(params).promise();
     return result;
@@ -64,7 +65,7 @@ export const handler = async (event: APIGatewayEvent) => {
                     }
                     return sendSuccessResponse(JSON.stringify({
                         metricName: event.queryStringParameters?.metricName,
-                        UnHealtyInstances: result.Count,
+                        UnhealthyInstances: result.Count,
                         HealthyInstances: healthyInstances
                     }));
                 }

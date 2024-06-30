@@ -1,34 +1,50 @@
+import { useEffect, useState } from "react";
 import Box from "@cloudscape-design/components/box";
 import Button from "@cloudscape-design/components/button";
 import PieChart from "@cloudscape-design/components/pie-chart";
+import { DateRangePickerProps, Spinner } from "@cloudscape-design/components";
 import {
     colorChartsStatusHigh,
     colorChartsStatusPositive
 } from '@cloudscape-design/design-tokens';
-import { MetricInfo } from "../../model/model";
-
-
-const pieChartColorMapping: { [key: string]: string } = {
-    "Healthy Instances": colorChartsStatusPositive,
-    'Unhealthy Instances': colorChartsStatusHigh
-};
-
+import { MetricSummary } from "../../model/model";
+import { useMetricsSummary } from "../../hooks/use-metric-summary";
 interface IDashboardPieChartProps {
-    metricSummary: MetricInfo[],
     metricName: string,
+    dateRange: DateRangePickerProps.Value,
     setSelectedMetricName: (value: string) => void
 }
 
-const DashboardPieChart = ({ metricSummary, metricName, setSelectedMetricName }: IDashboardPieChartProps) => {
-    metricSummary = metricSummary.map((metric) => {
-        return {
-            ...metric,
-            color: pieChartColorMapping[metric.title]
-        }
-    })
+const DashboardPieChart = ({ metricName, dateRange, setSelectedMetricName }: IDashboardPieChartProps) => {
+    const [metricSummary, setMetricSummary] = useState<MetricSummary>();
+    const { data: metricsSummary, isLoading: isSummaryLoading, error: summaryError } = useMetricsSummary(dateRange as DateRangePickerProps.RelativeValue,  metricName);
+
+    useEffect(() => {
+        setMetricSummary(metricsSummary as MetricSummary)
+    }, [metricsSummary])
+
+    if (isSummaryLoading) {
+        return <Spinner />;
+    }
+
+    if (summaryError) {
+        return <div>Error: {summaryError.message}</div>
+    }
+
+    const updatedMetricSummary = [{
+        title: "Healthy Instances",
+        value: metricSummary?.HealthyInstances ?? 0,
+        color: colorChartsStatusPositive
+    },
+    {
+        title: "Unhealthy Instances",
+        value: metricSummary?.UnhealthyInstances ?? 0,
+        color: colorChartsStatusHigh
+    }
+    ];
     return (
         <PieChart
-            data={metricSummary}
+            data={updatedMetricSummary}
             detailPopoverContent={(datum, sum) => [
                 { key: "Resource count", value: <a href="#" onClick={() => { setSelectedMetricName(metricName); return false; }}>{datum.value}</a> },
                 {

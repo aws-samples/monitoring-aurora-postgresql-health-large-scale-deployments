@@ -2,7 +2,7 @@ import "@cloudscape-design/global-styles/index.css";
 import Layout from "./components/layout/Layout";
 
 import { Amplify } from 'aws-amplify';
-
+import { API_URL } from "./config.json";
 
 const existingConfig = Amplify.getConfig();
 Amplify.configure({
@@ -11,7 +11,7 @@ Amplify.configure({
     ...existingConfig.API,
     REST: {
       "myRestApi": {
-        endpoint: 'backEndURL'
+        endpoint: API_URL
       }
     }
   },

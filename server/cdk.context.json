@@ -11,6 +11,11 @@
       "name": "BufferCacheHitRatio",
       "threshold": 100,
       "thresholdOperator": ">="
+    },
+    {
+      "name": "CPUUtilization",
+      "threshold": 90,
+      "thresholdOperator": ">="
     }
   ],
   "availability-zones:account=259847763656:region=us-east-1": [
