@@ -9,7 +9,7 @@ export interface IPageProps extends ICloudWatcherProps {
     setSelectedMetricName: (value: string) => void
 }
 
-const Dashboard = ({ setSidePanel, dateRange, setSelectedMetricName }: IPageProps) => {
+const Dashboard = ({ setHelpPanel, dateRange, setSelectedMetricName }: IPageProps) => {
     const [metricsConfig, setMetricsConfig] = useState<MetricConfig[]>();
     const { data: metricsInfo } = useMetricsConfig();
     useEffect(() => {
@@ -24,7 +24,7 @@ const Dashboard = ({ setSidePanel, dateRange, setSelectedMetricName }: IPageProp
                     header={
                         <Header
                             variant="h2"
-                            info={<Link variant="info" onClick={() => setSidePanel(metric.helpText)}>Info</Link>}
+                            info={<Link variant="info" onClick={() => setHelpPanel({ header: metric.metricName, text: metric.helpText })}>Info</Link>}
                         >
                             {metric.metricName}
                         </Header>

@@ -1,4 +1,5 @@
 import { ApiError, get } from 'aws-amplify/api';
+import { HELPTEXT } from '../constant';
 
 export const getMetricsConfig = async (): Promise<unknown> => {
     try {
@@ -13,7 +14,7 @@ export const getMetricsConfig = async (): Promise<unknown> => {
                 metricName: metric.name,
                 threshold: metric.threshold,
                 thresholdOperator: metric.thresholdOperator,
-                "helpText": "Percentage of computer processing capacity used."
+                "helpText": HELPTEXT[metric.name]
             }
         })
     } catch (error) {
