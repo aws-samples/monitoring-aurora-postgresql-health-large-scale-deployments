@@ -15,8 +15,8 @@ type HelpTextType = {
 };
 
 export const HELPTEXT: HelpTextType = {
-  "CPUUtilization": <div><h2>Scenario: An Instance is Reported with High CPU utilization</h2>
-    <p>Symptom: CloudWatch metric CPUUtilization reports CPU utilization above the threshold defined.</p>
+  "CPUUtilization": <div>
+    <h2>Symptom: CloudWatch metric CPUUtilization reports CPU utilization above the threshold defined.</h2>
     <h3>Possible Causes:</h3>
     <ol>
       <li>Compare the following metrics with CPUUtilization (for the peak times) to identify the possible causes behind the issue:
@@ -39,8 +39,8 @@ export const HELPTEXT: HelpTextType = {
       <li>Upgrade the server to a larger instance to gain more CPU</li>
     </ol>
   </div>,
-  "FreeableMemory": <div><h2>Scenario: An Instance is Reported with Low Memory</h2>
-    <p>Symptom: CloudWatch metric FreeableMemory stays low for the period of observation.</p>
+  "FreeableMemory": <div>
+    <h2>Symptom: CloudWatch metric FreeableMemory stays low for the period of observation.</h2>
     <h3>Possible Causes:</h3>
     <ol>
       <li>Memory parameters are configured too high. Check non-default settings on these parameters:
@@ -63,12 +63,8 @@ export const HELPTEXT: HelpTextType = {
       <li>Upgrade the server to a larger instance to gain more memory</li>
     </ol>
   </div>,
-  "VolumeReadIOPS": "The number of read operations per second for this database.",
-  "WriteIOPS": "The number of write operations per second for this database.",
-  "NetworkReceiveThroughput": "The number of bytes received per second.",
-  "NetworkTransmitThroughput": "The number of bytes transmitted per second.",
-  "BufferCacheHitRatio": <div><h2>Scenario: An Instance is reported with Low Buffer Cache Hit Ratio</h2>
-    <p>Symptom: CloudWatch metric BufferCachehitRatio stays lower than the threshold defined during the period of observation.</p>
+  "BufferCacheHitRatio": <div>
+    <h2>Symptom: CloudWatch metric BufferCachehitRatio stays lower than the threshold defined during the period of observation.</h2>
     <h3>Possible Causes:</h3>
     <ol>
       <li>High amount of IOs matching the low value of this metric. Check the following values for the instance and the database parameters:

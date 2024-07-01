@@ -2,7 +2,7 @@
   "scheduleDurationInHours": 1,
   "metricsTracked": [
     {
-      "name": "VolumeReadIOPS",
+      "name": "FreeableMemory",
       "threshold": 90,
       "thresholdOperator": ">="
     },
