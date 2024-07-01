@@ -1,6 +1,7 @@
 import {
     AppLayout,
-    SplitPanel
+    Header,
+    HelpPanel
 } from '@cloudscape-design/components';
 import { I18nProvider } from '@cloudscape-design/components/i18n';
 import messages from '@cloudscape-design/components/i18n/messages/all.en';
@@ -22,10 +23,15 @@ const appLayoutLabels = {
     toolsClose: "Close help panel",
 };
 
+export type helpPanelType = {
+    header: string | JSX.Element
+    text: string | JSX.Element
+}
+
 
 const Layout = () => {
 
-    const [splitPanelOpen, setSplitPanelOpen] = useState<string>();
+    const [helpPanel, setHelpPanel] = useState<helpPanelType>();
 
 
     return (
@@ -34,21 +40,16 @@ const Layout = () => {
             <TopNavbar />
             <AppLayout
                 content={
-                    <CloudWatcher setSidePanel={setSplitPanelOpen} />
+                        <CloudWatcher setHelpPanel={setHelpPanel} />
                 }
-                headerSelector="#h"
-                ariaLabels={appLayoutLabels}
-                splitPanelPreferences={{ position: 'side' }}
-                splitPanelOpen={splitPanelOpen ? true : false}
-                onSplitPanelToggle={() => setSplitPanelOpen(undefined)}
-                splitPanelSize={360}
-                toolsHide={true}
+                    ariaLabels={appLayoutLabels}
                 navigationHide={true}
-                splitPanel={
-                    <SplitPanel header="Info" closeBehavior="hide" hidePreferencesButton={true}>
-                        <>{splitPanelOpen}</>
-                    </SplitPanel>
-                }
+                    onToolsChange={() => setHelpPanel(undefined)}
+                    toolsOpen={helpPanel ? true : false}
+                    tools={<HelpPanel header={
+                        <Header variant="h2">{helpPanel?.header}</Header>
+                    }>{helpPanel?.text}</HelpPanel>}
+                    toolsWidth={360}
 
             />
             </QueryClientProvider>

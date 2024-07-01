@@ -2,14 +2,15 @@ import { Button, ContentLayout, DateRangePickerProps } from "@cloudscape-design/
 import { useState } from "react";
 import Dashboard from "../components/dashboard/Dashboard";
 import RelativeDateRangePicker from "../components/dateRange/DateRange";
+import { helpPanelType } from "../components/layout/Layout";
 import MetricsTable from "../components/metricsTable/MetricsTable";
 import { DEFAULT_DATE_FILTER } from "../constant";
 
 export interface ICloudWatcherProps {
-    setSidePanel: (value: string) => void,
+    setHelpPanel: (value: helpPanelType) => void,
 }
 
-const CloudWatcher = ({ setSidePanel }: ICloudWatcherProps) => {
+const CloudWatcher = ({ setHelpPanel }: ICloudWatcherProps) => {
 
     const [selectedMetricName, setSelectedMetricName] = useState<string | undefined>(undefined);
     const [dateRangeFilter, setDateRangeFilter] = useState<DateRangePickerProps.Value>(DEFAULT_DATE_FILTER);
@@ -21,9 +22,9 @@ const CloudWatcher = ({ setSidePanel }: ICloudWatcherProps) => {
             <h3>Date Range filter</h3>
             <RelativeDateRangePicker value={dateRangeFilter} setValue={setDateRangeFilter} />
             <br />
-            {!selectedMetricName && <Dashboard setSidePanel={setSidePanel} dateRange={dateRangeFilter} setSelectedMetricName={setSelectedMetricName} />}
+            {!selectedMetricName && <Dashboard setHelpPanel={setHelpPanel} dateRange={dateRangeFilter} setSelectedMetricName={setSelectedMetricName} />}
 
-            {selectedMetricName && <MetricsTable setSidePanel={setSidePanel} dateRange={dateRangeFilter} metricName={selectedMetricName} />}
+            {selectedMetricName && <MetricsTable setHelpPanel={setHelpPanel} dateRange={dateRangeFilter} metricName={selectedMetricName} />}
             <p>
                 <li>Some instructions</li>
             </p>

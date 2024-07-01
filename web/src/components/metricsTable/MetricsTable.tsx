@@ -2,15 +2,16 @@ import { Box, DateRangePickerProps, Header, Link, SpaceBetween, Spinner, Table }
 import { useEffect, useState } from "react";
 import { useMetricsDetails } from "../../hooks/use-metric-details";
 import { MetricItem } from "../../model/model";
+import { helpPanelType } from "../layout/Layout";
 
 
 interface IMetricDetailsProps {
     metricName: string,
-    setSidePanel: (value: string) => void,
+    setHelpPanel: (value: helpPanelType) => void,
     dateRange: DateRangePickerProps.Value
 }
 
-const MetricsTable = ({ setSidePanel, dateRange, metricName }: IMetricDetailsProps) => {
+const MetricsTable = ({ setHelpPanel, dateRange, metricName }: IMetricDetailsProps) => {
 
     const [metricsDetails, setMetrcisDetails] = useState<MetricItem[]>([]);
     const { data: metricItems, isLoading, error } = useMetricsDetails(dateRange as DateRangePickerProps.RelativeValue, metricName);
@@ -79,7 +80,7 @@ const MetricsTable = ({ setSidePanel, dateRange, metricName }: IMetricDetailsPro
                     </SpaceBetween>
                 </Box>
             }
-            header={<Header> Metric logs <Link variant="info" onClick={() => setSidePanel("Metrics table")}>Info</Link> </Header>}
+            header={<Header> Metric logs <Link variant="info" onClick={() => setHelpPanel({ header: "Overview", text: "Metrics table" })}>Info</Link> </Header>}
         />
     );
 }
