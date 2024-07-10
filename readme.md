@@ -90,6 +90,12 @@ psql> exit
 
 ```
 
+* Install pgbench and initialize the example database 
+
+```
+sudo yum install postgresql15-contrib
+pgbench -i example -h <aurora writer endpoint> -U postgres 
+```
 * Run the pgbench tool to generate CPU and Memory load for the tests
 
 ```
