@@ -8,7 +8,13 @@ export async function listAuroraPostgreSQLInstanceIds(): Promise<string[]> {
         const clusters = await rdsClient.describeDBClusters({});
         const instanceIds: string[] = [];
         clusters.DBClusters?.forEach(cluster => {
-            instanceIds.push(cluster.DBClusterIdentifier!);
+            if (cluster.Engine === 'aurora-postgresql') {
+                cluster.DBClusterMembers?.forEach(member => {
+                    if (member.IsClusterWriter) {
+                        instanceIds.push(member.DBInstanceIdentifier || '');
+                    }
+                });
+            }
         }
         );
         return instanceIds;

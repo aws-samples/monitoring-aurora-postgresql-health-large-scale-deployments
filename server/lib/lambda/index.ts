@@ -3,6 +3,7 @@ import { DynamoDB } from '@aws-sdk/client-dynamodb';
 import { SSMClient, GetParameterCommand } from "@aws-sdk/client-ssm"
 import { EventBridgeHandler, EventBridgeEvent, Context, Callback } from 'aws-lambda';
 import { listAuroraPostgreSQLInstanceIds } from './listAuroraPostgreSQLInstanceIds';
+import { evaluate } from 'mathjs';
 
 type MetricConfig = {
     name: string;
@@ -11,7 +12,7 @@ type MetricConfig = {
 }
 
 const getCloudWatchMetric = async (db_instance_id: string, metricConfig: MetricConfig, startTime: Date, endTime: Date) => {
-
+    
     const cloudwatch = new CloudWatch();
     const data = await cloudwatch.getMetricStatistics({
         Namespace: 'AWS/RDS',
@@ -25,8 +26,8 @@ const getCloudWatchMetric = async (db_instance_id: string, metricConfig: MetricC
         StartTime: startTime,
         EndTime: endTime,
         Period: 3600,
-        Statistics: ['Maximum'],
-        Unit: 'Percent'
+        Statistics: [Statistic.Maximum],
+        ...metricConfig.name !== 'FreeableMemory' && { Unit: 'Percent' }
     });
     return data.Datapoints ?? [];
 }
@@ -47,14 +48,13 @@ const iterateLogs = async (numberOfHours: number, metricsTracked: MetricConfig[]
                 const dataPoints = await getCloudWatchMetric(instanceId, metric, startTime, endTime);
                 console.log(dataPoints);
                 for (const dataPoint of dataPoints) {
-                    const expression = `${dataPoint.Average}${metric.thresholdOperator}${metric.threshold}`
+                    const expression = `${dataPoint.Maximum}${metric.thresholdOperator}${metric.threshold}`
                     console.log(expression);
-                    //TODO - remove eval, either use Mathjs or expr-eval or something similar
-                    if (dataPoint.Average && eval(`${dataPoint.Average}${metric.thresholdOperator}${metric.threshold}`)) {
-                        const average = dataPoint.Average.toFixed(2);
+                    if (dataPoint.Maximum && evaluate(`${dataPoint.Maximum}${metric.thresholdOperator}${metric.threshold}`)) {
+                        const Maximum = dataPoint.Maximum.toFixed(2);
                         const startTimeMs = startTime.getTime();
                         const startTimeEpoch = Math.floor(startTimeMs / 1000);
-                        insertIntoDynamoDb(instanceId, metric.name, average, startTimeEpoch);
+                        insertIntoDynamoDb(instanceId, metric.name, Maximum, startTimeEpoch);
                     }
                 }
             }

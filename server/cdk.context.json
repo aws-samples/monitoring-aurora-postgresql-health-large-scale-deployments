@@ -8,12 +8,12 @@
     },
     {
       "name": "BufferCacheHitRatio",
-      "threshold": 90,
+      "threshold": 100,
       "thresholdOperator": "<="
     },
     {
       "name": "CPUUtilization",
-      "threshold": 95,
+      "threshold": 40,
       "thresholdOperator": ">="
     }
   ]

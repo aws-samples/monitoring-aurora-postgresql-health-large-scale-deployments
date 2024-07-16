@@ -120,7 +120,7 @@ export class BackendStack extends cdk.Stack {
       handler: 'iterateLogsOnASchedule',
       runtime: lambda.Runtime.NODEJS_18_X,
       timeout: cdk.Duration.minutes(5),
-      functionName: "BufferCacheLambda",
+      functionName: "DataCollectionLambda",
       environment: {
         DYNAMODB_TABLE_NAME: table.tableName,
         NUMBER_OF_HOURS_TO_CAPTURE_DATA_FOR: this.scheduleDuration.toString(),
