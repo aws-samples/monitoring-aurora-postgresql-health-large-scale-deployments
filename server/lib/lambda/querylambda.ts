@@ -28,12 +28,12 @@ const queryTableByMetricsName = async (metricName: string, startTimeEpoch: strin
             ':startTimeEpoch': parseInt(startTimeEpoch),
             ':endTimeEpoch': parseInt(endTimeEpoch)
         },
-        ProjectionExpression: 'InstanceId, MetricName, MetricValueAverage, DateHourTimeZone',
+        ProjectionExpression: 'InstanceId, MetricName, MetricValueAverage, DateHourTimeZone'
     };
-    if(count) {
-        params.Select = 'COUNT';
-        delete params.ProjectionExpression;
-    }
+    // if (count) {
+    //     params.Select = 'COUNT';
+    //     delete params.ProjectionExpression;
+    // }
     const result = await dynamodb.query(params).promise();
     return result;
 }
@@ -52,21 +52,25 @@ const sendSuccessResponse = (response: string) => {
 
 // Lambda handler function
 export const handler = async (event: APIGatewayEvent) => {
-    console.log('Event:', event);
     try {
         switch (event.path) {
             case "/query-all":
                 const result = await queryTableByMetricsName(event.queryStringParameters?.metricName || '', event.queryStringParameters?.startTimeEpoch || '', event.queryStringParameters?.endTimeEpoch || '', event.queryStringParameters?.count ? true : false);
                 if (event.queryStringParameters?.count) {
-                    let healthyInstances = (await listAuroraPostgreSQLInstanceIds()).length - (result.Count || 0);
-                    //TODO - Remove this
-                    if (process.env.TEMP_RETURN_VALUE) {
-                        healthyInstances = parseInt(process.env.TEMP_RETURN_VALUE) - (result.Count || 0);
-                    }
+                    const groupedItems = result.Items?.reduce((acc, item) => {
+                        let { InstanceId, ...rest } = item;
+                        if (!acc[InstanceId]) {
+                            acc[InstanceId] = [];
+                        }
+                        acc[InstanceId].push(rest);
+                        return acc;
+                    }, {});
+                    const totalInstances = (await listAuroraPostgreSQLInstanceIds()).length;
+                    const failedInstance = Object.keys(groupedItems!).length;
                     return sendSuccessResponse(JSON.stringify({
                         metricName: event.queryStringParameters?.metricName,
-                        UnhealthyInstances: result.Count,
-                        HealthyInstances: healthyInstances
+                        UnhealthyInstances: failedInstance,
+                        HealthyInstances: totalInstances - failedInstance
                     }));
                 }
                 return sendSuccessResponse(JSON.stringify(result.Items));
@@ -79,7 +83,12 @@ export const handler = async (event: APIGatewayEvent) => {
                     statusCode: 404,
                     body: JSON.stringify({
                         message: 'Not found'
-                    })
+                    }),
+                    headers: {
+                        "Access-Control-Allow-Headers": "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent",
+                        "Access-Control-Allow-Origin": "*",
+                        "Access-Control-Allow-Methods": "OPTIONS,GET"
+                    }
                 }
         }
     } catch (error) {

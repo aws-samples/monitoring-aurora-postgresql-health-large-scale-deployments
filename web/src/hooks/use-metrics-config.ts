@@ -7,8 +7,8 @@ export const useMetricsConfig = (
 ) => {
     return useQuery({
         queryKey: ["metricsConfig"],
-        queryFn: () => {
-            return getMetricsConfig();
+        queryFn: async () => {
+            return await getMetricsConfig();
         },
         ...options,
     });

@@ -167,6 +167,16 @@ export class BackendStack extends cdk.Stack {
         METRICS_TRACKED: metricsTracked.parameterName
       }
     });
+    const describeClustersPolicyStatement = new iam.PolicyStatement(
+      {
+        effect: cdk.aws_iam.Effect.ALLOW,
+        actions: [
+          'rds:DescribeDBClusters'
+        ],
+        resources: ['*']
+      }
+    )
+    lambdaFunction.addToRolePolicy(describeClustersPolicyStatement);
     table.grantReadData(lambdaFunction);
     metricsTracked.grantRead(lambdaFunction);
     return lambdaFunction

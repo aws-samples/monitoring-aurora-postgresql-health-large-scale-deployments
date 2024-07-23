@@ -46,7 +46,7 @@ Review the `server/cdk.context.json` file for the configuration changes. Here ar
 * `scheduleDurationInHours` - At this specified duration, the cloudwatch metrics logs for the defined metrics are traversed. For example, if this value is set to `6` then, for each 6 hours, the schedule will execute a function, which will capture hourly metrics for those 6 hours.
 * `metricsTracked` - This tells the application what metrics you would want to capture. This is an array of items as defined below. Although these values are changeable to your needs, it is recommended to start with and stick to the values provided by this application
   * `name` - This is the of the metrics to be captured
-  * `threshold` - This is the threshold at which the cloudwatch metrics will be considered as unhealthy. The application captures max of the metrics matching to this threshold along with `thresholdOperator` explained below
+  * `threshold` - This is the threshold at which the cloudwatch metrics will be considered as unhealthy. The application captures max of the metrics matching to this threshold along with `thresholdOperator` explained below. Please note that this value should change according to metrics. For example, for `FreeableMemory` you may want to use a number that is expressed in Memory Bytes, whereas for `CPUUtilization` you may want to use a number that is expressed in percentage.
   * `thresholdOperator` - This is the threshold operator, and supported operators are `=`, `>`, `<`, `<=`,`>=`
 
   For example a record like

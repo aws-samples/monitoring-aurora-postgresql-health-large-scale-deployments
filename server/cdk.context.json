@@ -3,7 +3,7 @@
   "metricsTracked": [
     {
       "name": "FreeableMemory",
-      "threshold": 90,
+      "threshold": 200000,
       "thresholdOperator": ">="
     },
     {
