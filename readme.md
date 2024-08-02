@@ -114,3 +114,13 @@ npm run deploy -- -c sourceIp=PUBLIC_IP_GOES_HERE
 ```
 
 Replace `PUBLIC_IP_GOES_HERE` value with the public IP of your machine. This makes sure that the API gateway is only accessible from your machine and not publically accessible.
+
+
+## Cleanup
+
+You can clean up using this command
+
+```
+cd server
+cdk destroy -c sourceIp=PUBLIC_IP_GOES_HERE
+```
