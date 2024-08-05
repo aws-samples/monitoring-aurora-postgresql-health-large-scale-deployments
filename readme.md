@@ -122,5 +122,5 @@ You can clean up using this command
 
 ```
 cd server
-cdk destroy -c sourceIp=PUBLIC_IP_GOES_HERE
+cdk destroy 
 ```

@@ -12,12 +12,6 @@ import { AnyPrincipal } from 'aws-cdk-lib/aws-iam';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
 import WebDeployer from './webdeployer';
 
-interface MyStackProps extends cdk.StackProps {
-  scheduleDuration: number;
-  sourceIp: string;
-  metricsTracked: MetricConfig[]
-}
-
 type MetricConfig = {
   name: string;
   threshold: number;
@@ -28,16 +22,24 @@ export class BackendStack extends cdk.Stack {
   private scheduleDuration = 1;
   private sourceIp = '';
   private webDeployer: WebDeployer;
-  constructor(app: Construct, id: string, props: MyStackProps) {
+  constructor(app: Construct, id: string, props?: cdk.StackProps) {
     super(app, id, props);
-    const table = this.createDynamoDb();
-    this.scheduleDuration = props.scheduleDuration;
-    this.sourceIp = props.sourceIp;
-    const metricsTracked = this.createMetricsTrackedParameter(props.metricsTracked)
+    let scheduleDuration: number = app.node.tryGetContext('scheduleDurationInHours');
+    if (!scheduleDuration || scheduleDuration < 1) {
+      scheduleDuration = 1
+    }
+    const sourceIp = app.node.tryGetContext('sourceIp');
+    const trackedMetrics = app.node.tryGetContext('metricsTracked');
+    const tableName = 'AuroraHealthMetrics';
+    const localSecondaryIndexName = 'lsi_date';
+    const table = this.createDynamoDb(tableName, localSecondaryIndexName);
+    this.scheduleDuration = scheduleDuration;
+    this.sourceIp = sourceIp;
+    const metricsTracked = this.createMetricsTrackedParameter(trackedMetrics)
     const backendLambda = this.createBackendLambda(table, metricsTracked);
     this.createEventBridge(app, backendLambda);
-    const queryLambda = this.createQueryLambda(table, metricsTracked);
-    const apiGateway = this.createApiGateway(table, queryLambda);
+    const queryLambda = this.createQueryLambda(table, localSecondaryIndexName, metricsTracked);
+    const apiGateway = this.createApiGateway(queryLambda);
     this.webDeployer = new WebDeployer(this, apiGateway);
     this.webDeployer.deploy();
   }
@@ -59,7 +61,7 @@ export class BackendStack extends cdk.Stack {
     rule.addTarget(new cdk.aws_events_targets.LambdaFunction(backendLambda));
   }
 
-  private createApiGateway(table: cdk.aws_dynamodb.Table, lambda: NodejsFunction) {
+  private createApiGateway(lambda: NodejsFunction) {
     // API Gateway
     const explicitDenyExceptOne = new iam.PolicyStatement({
       effect: iam.Effect.DENY,
@@ -155,7 +157,7 @@ export class BackendStack extends cdk.Stack {
     return lambdaFunction;
   }
 
-  private createQueryLambda(table: cdk.aws_dynamodb.Table, metricsTracked: StringParameter) {
+  private createQueryLambda(table: cdk.aws_dynamodb.Table, localSecondaryIndexName: string, metricsTracked: StringParameter) {
     const lambdaFunction = new NodejsFunction(this, 'querylambdaFunction', {
       entry: path.join(__dirname, "lambda/querylambda.ts"),
       handler: 'handler',
@@ -164,6 +166,7 @@ export class BackendStack extends cdk.Stack {
       functionName: "querylambda",
       environment: {
         DYNAMODB_TABLE_NAME: table.tableName,
+        DYNAMODB_INDEX_NAME: localSecondaryIndexName,
         METRICS_TRACKED: metricsTracked.parameterName
       }
     });
@@ -178,19 +181,31 @@ export class BackendStack extends cdk.Stack {
     )
     lambdaFunction.addToRolePolicy(describeClustersPolicyStatement);
     table.grantReadData(lambdaFunction);
+    lambdaFunction.addToRolePolicy(
+      new iam.PolicyStatement({
+        actions: ['dynamodb:Query'],
+        resources: [`${table.tableArn}/index/*`],
+      }),
+    );    
     metricsTracked.grantRead(lambdaFunction);
     return lambdaFunction
   }
 
-  private createDynamoDb() {
-    const dynamoDb = new cdk.aws_dynamodb.Table(this, 'aurorahealthmonitor', {
-      tableName: 'aurorahealthmonitor',
+  private createDynamoDb(tableName: string, secondaryIndexName: string) {
+    const dynamoDb = new cdk.aws_dynamodb.Table(this, tableName, {
+      tableName: tableName,
       partitionKey: { name: 'MetricName', type: cdk.aws_dynamodb.AttributeType.STRING },
-      sortKey: { name: 'DateHourTimeZone', type: cdk.aws_dynamodb.AttributeType.NUMBER },
+      sortKey: { name: 'DateInstance', type: cdk.aws_dynamodb.AttributeType.STRING },
       readCapacity: 5,
       writeCapacity: 5,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
+    // Add a local secondary index so that the query lambda can search data by date range
+    dynamoDb.addLocalSecondaryIndex({
+      indexName: secondaryIndexName,
+      sortKey: {name: 'DateHourTimeZone', type: cdk.aws_dynamodb.AttributeType.NUMBER},
+      projectionType: cdk.aws_dynamodb.ProjectionType.ALL
+   });    
     return dynamoDb;
   }
 }

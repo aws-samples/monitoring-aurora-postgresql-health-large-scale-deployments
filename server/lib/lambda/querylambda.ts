@@ -16,12 +16,13 @@ async function getMetricsTracked() {
 
 const queryTableByMetricsName = async (metricName: string, startTimeEpoch: string, endTimeEpoch: string, count: boolean) => {
     console.log(metricName, startTimeEpoch, endTimeEpoch);
-    if (!metricName || !process.env.DYNAMODB_TABLE_NAME || !startTimeEpoch || !endTimeEpoch) {
+    if (!metricName || !process.env.DYNAMODB_TABLE_NAME || !startTimeEpoch || !endTimeEpoch || !process.env.DYNAMODB_INDEX_NAME) {
         throw new Error('Missing required parameters');
     }
     let keyConditionExpression = 'MetricName = :metricName AND DateHourTimeZone BETWEEN :startTimeEpoch AND :endTimeEpoch'
     let params: AWS.DynamoDB.DocumentClient.QueryInput = {
         TableName: process.env.DYNAMODB_TABLE_NAME,
+        IndexName: process.env.DYNAMODB_INDEX_NAME,
         KeyConditionExpression: keyConditionExpression,
         ExpressionAttributeValues: {
             ':metricName': metricName,
@@ -30,10 +31,6 @@ const queryTableByMetricsName = async (metricName: string, startTimeEpoch: strin
         },
         ProjectionExpression: 'InstanceId, MetricName, MetricValueAverage, DateHourTimeZone'
     };
-    // if (count) {
-    //     params.Select = 'COUNT';
-    //     delete params.ProjectionExpression;
-    // }
     const result = await dynamodb.query(params).promise();
     return result;
 }
