@@ -10,7 +10,6 @@ import path from 'path';
 import { Cors } from 'aws-cdk-lib/aws-apigateway';
 import { AnyPrincipal } from 'aws-cdk-lib/aws-iam';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
-import fs from 'fs';
 
 type MetricConfig = {
   name: string;
@@ -27,13 +26,12 @@ export class BackendStack extends cdk.Stack {
     if (!scheduleDuration || scheduleDuration < 1) {
       scheduleDuration = 1
     }
-    const sourceIp = app.node.tryGetContext('sourceIp');
+    this.sourceIp = process.env.sourceIp ?? '';
     const trackedMetrics = app.node.tryGetContext('metricsTracked');
     const tableName = 'AuroraHealthMetrics';
     const localSecondaryIndexName = 'lsi_date';
     const table = this.createDynamoDb(tableName, localSecondaryIndexName);
     this.scheduleDuration = scheduleDuration;
-    this.sourceIp = sourceIp;
     const metricsTracked = this.createMetricsTrackedParameter(trackedMetrics)
     const backendLambda = this.createBackendLambda(table, metricsTracked);
     this.createEventBridge(app, backendLambda);
@@ -108,10 +106,6 @@ export class BackendStack extends cdk.Stack {
     proxyResource2.addMethod('GET', proxyIntegration, { methodResponses: [{ statusCode: '200' }] });
     const proxyResource3 = apiGateway.root.addResource('metricslist');
     proxyResource3.addMethod('GET', proxyIntegration, { methodResponses: [{ statusCode: '200' }] });
-
-    const configFile = '../output.json';
-    const config = JSON.parse(fs.readFileSync(configFile, 'utf8'));
-    config.apiGatewayUrl = apiGateway.url;
 
     return apiGateway;
   }
