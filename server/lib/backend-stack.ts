@@ -10,7 +10,6 @@ import path from 'path';
 import { Cors } from 'aws-cdk-lib/aws-apigateway';
 import { AnyPrincipal } from 'aws-cdk-lib/aws-iam';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
-import WebDeployer from './webdeployer';
 
 interface MyStackProps extends cdk.StackProps {
   scheduleDuration: number;
@@ -27,9 +26,14 @@ type MetricConfig = {
 export class BackendStack extends cdk.Stack {
   private scheduleDuration = 1;
   private sourceIp = '';
-  private webDeployer: WebDeployer;
   constructor(app: Construct, id: string, props: MyStackProps) {
     super(app, id, props);
+    if (!props.sourceIp) {
+      throw new Error('sourceIp is required');
+    }
+    if (!props.metricsTracked || props.metricsTracked.length <= 0) {
+      throw new Error('At least one metricsTracked value should be present');
+    }
     const table = this.createDynamoDb();
     this.scheduleDuration = props.scheduleDuration;
     this.sourceIp = props.sourceIp;
@@ -37,9 +41,7 @@ export class BackendStack extends cdk.Stack {
     const backendLambda = this.createBackendLambda(table, metricsTracked);
     this.createEventBridge(app, backendLambda);
     const queryLambda = this.createQueryLambda(table, metricsTracked);
-    const apiGateway = this.createApiGateway(table, queryLambda);
-    this.webDeployer = new WebDeployer(this, apiGateway);
-    this.webDeployer.deploy();
+    this.createApiGateway(table, queryLambda);
   }
 
   //Upload the Metrics Tracked to Paramter store in AWS

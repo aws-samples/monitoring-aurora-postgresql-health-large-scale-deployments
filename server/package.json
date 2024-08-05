@@ -2,7 +2,7 @@
   "name": "backend",
   "version": "0.1.0",
   "bin": {
-    "backend": "bin/backend.js"
+    "deploy": "bin/app.ts"
   },
   "scripts": {
     "build": "tsc",
@@ -10,7 +10,8 @@
     "test": "jest",
     "cdk": "cdk",
     "buildweb": "cd ../web && npm run build",
-    "deploy": "npm run buildweb && cdk deploy"
+    "deployBackend": "cdk deploy BackendStack",
+    "deployWeb": "npm run buildweb && cdk deploy WebStack"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.136",
