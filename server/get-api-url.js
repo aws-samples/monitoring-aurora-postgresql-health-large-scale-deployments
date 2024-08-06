@@ -1,9 +1,10 @@
 const AWS = require('aws-sdk');
 const fs = require('fs');
 const path = require('path');
+const { execSync } = require('child_process');
+const region = execSync('aws configure get region').toString().trim();
 
-// Initialize AWS SDK
-const cloudformation = new AWS.CloudFormation({ region: 'us-east-1' }); // Update the region as needed
+const cloudformation = new AWS.CloudFormation({ region }); // Update the region as needed
 
 // Function to get stack outputs
 const getStackOutputs = async (stackName) => {
@@ -29,8 +30,6 @@ const main = async () => {
     const stackName = 'ServerStack'; // Update with your actual stack name
     try {
         const outputs = await getStackOutputs(stackName);
-        console.log('Stack Outputs:', outputs); // Log all outputs to inspect
-
         // Use regex to find the matching output key
         const regex = /^ProxyCacheAPIEndpoint/;
         let apiUrl;
