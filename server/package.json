@@ -10,7 +10,7 @@
     "test": "jest",
     "cdk": "cdk",
     "buildweb": "cd ../web && npm run build",
-    "deploy:server": "cdk deploy ServerStack && node get-api-url.js",
+    "deploy:server": "npm run buildweb && cdk deploy ServerStack && node get-api-url.js",
     "deploy:web": "npm run buildweb && cdk deploy WebStack",
     "deploy": "npm run deploy:server && npm run deploy:web"
   },
