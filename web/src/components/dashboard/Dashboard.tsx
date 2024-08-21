@@ -1,4 +1,4 @@
-import { Container, DateRangePickerProps, Header, Link } from '@cloudscape-design/components';
+import { Container, DateRangePickerProps, Header, Link, Spinner } from '@cloudscape-design/components';
 import { useEffect, useState } from "react";
 import { useMetricsConfig } from "../../hooks/use-metrics-config";
 import { MetricConfig } from '../../model/model';
@@ -11,10 +11,14 @@ export interface IPageProps extends ICloudWatcherProps {
 
 const Dashboard = ({ setHelpPanel, dateRange, setSelectedMetricName }: IPageProps) => {
     const [metricsConfig, setMetricsConfig] = useState<MetricConfig[]>();
-    const { data: metricsInfo } = useMetricsConfig();
+    const { data: metricsInfo, isLoading } = useMetricsConfig();
     useEffect(() => {
         setMetricsConfig(metricsInfo as MetricConfig[])
     }, [metricsInfo]);
+
+    if (isLoading) {
+        return <Spinner />;
+    }
 
     return (
         <div style={{ display: 'flex', gap: '1em' }}>

@@ -110,7 +110,15 @@ Deploy using following command
 
 ```
 cd server
-npm run deploy -- -c sourceIp=PUBLIC_IP_GOES_HERE
+sourceIp=PUBLIC_IP_GOES_HERE npm run deploy:server
+npm run deploy:web
+```
+
+or
+
+```
+cd server
+sourceIp=PUBLIC_IP_GOES_HERE npm run deploy
 ```
 
 Replace `PUBLIC_IP_GOES_HERE` value with the public IP of your machine. This makes sure that the API gateway is only accessible from your machine and not publically accessible.
@@ -122,5 +130,5 @@ You can clean up using this command
 
 ```
 cd server
-cdk destroy 
+cdk destroy --all
 ```
