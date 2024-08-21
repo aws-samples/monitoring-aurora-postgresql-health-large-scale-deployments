@@ -10,7 +10,6 @@ import path from 'path';
 import { Cors } from 'aws-cdk-lib/aws-apigateway';
 import { AnyPrincipal } from 'aws-cdk-lib/aws-iam';
 import { StringParameter } from 'aws-cdk-lib/aws-ssm';
-import WebDeployer from './webdeployer';
 
 type MetricConfig = {
   name: string;
@@ -21,27 +20,23 @@ type MetricConfig = {
 export class BackendStack extends cdk.Stack {
   private scheduleDuration = 1;
   private sourceIp = '';
-  private webDeployer: WebDeployer;
   constructor(app: Construct, id: string, props?: cdk.StackProps) {
     super(app, id, props);
     let scheduleDuration: number = app.node.tryGetContext('scheduleDurationInHours');
     if (!scheduleDuration || scheduleDuration < 1) {
       scheduleDuration = 1
     }
-    const sourceIp = app.node.tryGetContext('sourceIp');
+    this.sourceIp = process.env.sourceIp ?? '';
     const trackedMetrics = app.node.tryGetContext('metricsTracked');
     const tableName = 'AuroraHealthMetrics';
     const localSecondaryIndexName = 'lsi_date';
     const table = this.createDynamoDb(tableName, localSecondaryIndexName);
     this.scheduleDuration = scheduleDuration;
-    this.sourceIp = sourceIp;
     const metricsTracked = this.createMetricsTrackedParameter(trackedMetrics)
     const backendLambda = this.createBackendLambda(table, metricsTracked);
     this.createEventBridge(app, backendLambda);
     const queryLambda = this.createQueryLambda(table, localSecondaryIndexName, metricsTracked);
-    const apiGateway = this.createApiGateway(queryLambda);
-    this.webDeployer = new WebDeployer(this, apiGateway);
-    this.webDeployer.deploy();
+    this.createApiGateway(queryLambda);
   }
 
   //Upload the Metrics Tracked to Paramter store in AWS
@@ -205,7 +200,7 @@ export class BackendStack extends cdk.Stack {
       indexName: secondaryIndexName,
       sortKey: {name: 'DateHourTimeZone', type: cdk.aws_dynamodb.AttributeType.NUMBER},
       projectionType: cdk.aws_dynamodb.ProjectionType.ALL
-   });    
+    });
     return dynamoDb;
   }
 }
