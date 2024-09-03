@@ -62,7 +62,7 @@ const MetricsTable = ({ setHelpPanel, dateRange, metricName }: IMetricDetailsPro
                 {
                     id: "Date",
                     header: "Date",
-                    cell: item => item.DateHourTimeZone || "-"
+                    cell: item => item.DateHourTimeZone ? (new Date(item.DateHourTimeZone * 1000)).toLocaleString() : "-"
                 }
             ]}
             enableKeyboardNavigation
