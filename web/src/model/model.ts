@@ -15,6 +15,6 @@ export interface MetricConfig {
 export interface MetricItem {
     InstanceId: string,
     MetricName: string,
-    MetricValueAverage: number,
+    MetricValue: number,
     DateHourTimeZone: number
 }

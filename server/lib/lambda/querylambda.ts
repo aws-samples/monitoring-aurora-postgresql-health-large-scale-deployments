@@ -29,7 +29,7 @@ const queryTableByMetricsName = async (metricName: string, startTimeEpoch: strin
             ':startTimeEpoch': parseInt(startTimeEpoch),
             ':endTimeEpoch': parseInt(endTimeEpoch)
         },
-        ProjectionExpression: 'InstanceId, MetricName, MetricValueAverage, DateHourTimeZone'
+        ProjectionExpression: 'InstanceId, MetricName, MetricValue, DateHourTimeZone'
     };
     const result = await dynamodb.query(params).promise();
     return result;

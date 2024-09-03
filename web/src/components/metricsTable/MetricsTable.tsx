@@ -54,15 +54,15 @@ const MetricsTable = ({ setHelpPanel, dateRange, metricName }: IMetricDetailsPro
                     sortingField: "InstanceId",
                 },
                 {
-                    id: "MetricValueAverage",
-                    header: "Metric Value Average",
-                    cell: item => item.MetricValueAverage || "-",
-                    sortingField: "MetricValueAverage"
+                    id: "MetricValue",
+                    header: "Metric Value",
+                    cell: item => item.MetricValue || "-",
+                    sortingField: "MetricValue"
                 },
                 {
                     id: "Date",
-                    header: "Date",
-                    cell: item => item.DateHourTimeZone ? (new Date(item.DateHourTimeZone * 1000)).toLocaleString() : "-"
+                    header: "Date Time Range",
+                    cell: item => item.DateHourTimeZone ? ((new Date(item.DateHourTimeZone * 1000)).toLocaleString() + " +1 hour") : "-"
                 }
             ]}
             enableKeyboardNavigation

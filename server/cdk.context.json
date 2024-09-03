@@ -1,20 +1,23 @@
 {
-  "scheduleDurationInHours": 1,
+  "scheduleDurationInHours": 1,  
   "metricsTracked": [
     {
       "name": "FreeableMemory",
-      "threshold": 200000,
-      "thresholdOperator": ">="
+      "threshold": 2048000000,
+      "statistics": "Minimum"      
     },
     {
       "name": "BufferCacheHitRatio",
-      "threshold": 100,
-      "thresholdOperator": "<="
+      "threshold": 90,
+      "statistics": "Minimum",
+      "unit": "Percent"
     },
     {
       "name": "CPUUtilization",
-      "threshold": 40,
-      "thresholdOperator": ">="
+      "threshold": 80,
+      "statistics": "Maximum",
+      "unit": "Percent"
     }
-  ]
+  ],
+  "docReference": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Aurora.AuroraMonitoring.Metrics.html#Aurora.AuroraMySQL.Monitoring.Metrics.instances"
 }
