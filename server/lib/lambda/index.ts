@@ -100,7 +100,7 @@ const getThresholdOperator = async(statistics: string) => {
 }   
 
 const insertIntoDynamoDb = async (instanceId: string, metric: string, value: string, startTimeEpoch: number) => {
-    console.log(`Inserting into dynamodb ${instanceId} for ${metric} ${average} ${startTimeEpoch}`);
+    console.log(`Inserting into dynamodb ${instanceId} for ${metric} ${value} ${startTimeEpoch}`);
     const dynamodb = new DynamoDB();
     const putResult = dynamodb.putItem({
         TableName: process.env.DYNAMODB_TABLE_NAME,
