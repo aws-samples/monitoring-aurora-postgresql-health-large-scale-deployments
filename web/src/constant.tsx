@@ -98,5 +98,10 @@ export const HELPTEXT: HelpTextType = {
       <li>Tune top SQLs with large disk IOs.</li>
       <li>Increase the value of shared_buffers parameter to assign more memory to the database instance for caching data.</li>
     </ol>
+  </div>,
+  "MetricLogs": <div><p><strong>Metric Name</strong> - Name of the metric configured for monitoring</p>
+    <p><strong>Id</strong> - Aurora PostgreSQL DB identifier</p>
+    <p><strong>Metric Value</strong> - Maximum or Minimum value, depending on the metric, recorded during the time range shown</p>
+    <p><strong>Date Time Range</strong> - The local time-period during which the maximum or minimum value was recorded</p>
   </div>
 }

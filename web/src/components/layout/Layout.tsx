@@ -43,9 +43,10 @@ const Layout = () => {
                         <CloudWatcher setHelpPanel={setHelpPanel} />
                 }
                     ariaLabels={appLayoutLabels}
-                navigationHide={true}
+                    navigationHide={true}
                     onToolsChange={() => setHelpPanel(undefined)}
                     toolsOpen={helpPanel ? true : false}
+                    toolsHide={helpPanel ? false : true}
                     tools={<HelpPanel header={
                         <Header variant="h2">{helpPanel?.header}</Header>
                     }>{helpPanel?.text}</HelpPanel>}
