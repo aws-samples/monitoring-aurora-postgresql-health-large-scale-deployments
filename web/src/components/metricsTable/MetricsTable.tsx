@@ -1,8 +1,9 @@
 import { Box, DateRangePickerProps, Header, Link, SpaceBetween, Spinner, Table } from "@cloudscape-design/components";
 import { useEffect, useState } from "react";
 import { useMetricsDetails } from "../../hooks/use-metric-details";
-import { MetricItem } from "../../model/model";
+import { MetricItem } from '../../model/model';
 import { helpPanelType } from "../layout/Layout";
+import { HELPTEXT } from '../../constant';
 
 
 interface IMetricDetailsProps {
@@ -27,7 +28,7 @@ const MetricsTable = ({ setHelpPanel, dateRange, metricName }: IMetricDetailsPro
     if (error) {
         return <div>Error: {error.message}</div>
     }
-
+    const metricLogsTableHelpText = HELPTEXT["MetricLogs"] as string;
     return (
         <Table
             renderAriaLive={({
@@ -41,9 +42,7 @@ const MetricsTable = ({ setHelpPanel, dateRange, metricName }: IMetricDetailsPro
                 {
                     id: "MetricName",
                     header: "Metric name",
-                    cell: item => (
-                        <Link href="#">{item.MetricName || "-"}</Link>
-                    ),
+                    cell: item => item.MetricName || "-",
                     sortingField: "MetricName",
                     isRowHeader: true
                 },
@@ -62,7 +61,8 @@ const MetricsTable = ({ setHelpPanel, dateRange, metricName }: IMetricDetailsPro
                 {
                     id: "Date",
                     header: "Date Time Range",
-                    cell: item => item.DateHourTimeZone ? ((new Date(item.DateHourTimeZone * 1000)).toLocaleString() + " +1 hour") : "-"
+                    cell: item => item.DateHourTimeZone ? ((new Date(item.DateHourTimeZone * 1000)).toLocaleString() + " +1 hour") : "-",
+                    sortingField: "DateHourTimeZone"
                 }
             ]}
             enableKeyboardNavigation
@@ -80,7 +80,7 @@ const MetricsTable = ({ setHelpPanel, dateRange, metricName }: IMetricDetailsPro
                     </SpaceBetween>
                 </Box>
             }
-            header={<Header> Metric logs <Link variant="info" onClick={() => setHelpPanel({ header: "Overview", text: "Metrics table" })}>Info</Link> </Header>}
+            header={<Header> Metric logs <Link variant="info" onClick={() => setHelpPanel({ header: "Metric logs", text: metricLogsTableHelpText })}>Info</Link> </Header>}
         />
     );
 }
