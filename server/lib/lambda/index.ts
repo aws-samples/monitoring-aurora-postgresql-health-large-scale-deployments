@@ -109,7 +109,7 @@ const insertIntoDynamoDb = async (instanceId: string, metric: string, value: str
             'MetricName': { S: metric },
             'MetricValue': { N: value },
             'DateHourTimeZone': { N: startTimeEpoch.toString() },
-            'DateInstance': {S: `${metric}#${instanceId}`}
+            'DateInstance': { S: `${instanceId}#${startTimeEpoch.toString()}` }
         }
     });
     return true;
