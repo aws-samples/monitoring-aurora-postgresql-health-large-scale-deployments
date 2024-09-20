@@ -56,7 +56,7 @@ sourceIp=PUBLIC_IP_GOES_HERE npm run deploy
 Replace `PUBLIC_IP_GOES_HERE` value with the public IP of your machine. This makes sure that the API gateway is only accessible from your machine and not publically accessible. You can retrieve your public IP using a tool like [whatsmyip](https://whatsmyip.com/).
 
 After the deployment is successful, you can use the URL from the output to launch the application. 
-Note that the solution captures the metrics for the databases every hour by default. Also note that the solution will not show any data for the metrics based on the databases in the same account. 
+Note that the solution captures the metrics for the databases every hour by default and will monitor the Aurora PostgreSQL database instances only. 
 
 ## Cleanup
 You can clean up using this command:
