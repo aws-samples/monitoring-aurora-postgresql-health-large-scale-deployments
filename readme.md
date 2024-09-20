@@ -36,7 +36,7 @@ In the solution, you have the option to define the values of below measures. An 
 •	Metric Interval: The duration of time over which a metric data point is collected and aggregated. For example: one hour
 •	Statistics: type of statistics of a metric. For example: Minimum
 
-In this project, the default metric setup to check the health of a database instance is BufferCachehitRatio at a minimum of 80%, CPUUtilization	at a maximum of 90%, FreeableMemory	at a minimum of 2 GB.
+In this project, the default metric setup to check the health of a database instance is BufferCachehitRatio at a minimum of 90%, CPUUtilization	at a maximum of 80%, FreeableMemory	at a minimum of 2 GB.
 
 ### Deploy
 - Clone this repository and install the component dependencies using the below commands:
