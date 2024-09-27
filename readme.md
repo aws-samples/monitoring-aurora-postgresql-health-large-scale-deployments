@@ -58,6 +58,69 @@ Replace `PUBLIC_IP_GOES_HERE` value with the public IP of your machine. This mak
 After the deployment is successful, you can use the URL from the output to launch the application. 
 Note that the solution captures the metrics for the databases every hour by default and will monitor the Aurora PostgreSQL database instances only. 
 
+### Performance Analysis and Tuning Recommendations
+
+#### High CPU Utilization:
+Scenario: An Instance is Reported with High CPU utilization
+Symptom: CloudWatch metric CPUUtilization reports CPU utilization above the threshold defined.
+<br>Possible Causes:
+1.	Compare the following metrics with CPUUtilization (for the peak times) to identify the possible causes behind the issue: \
+•	WriteIOPS \
+•	ReadIOPS \
+•	ReadThroughput \
+•	WriteThroughput \
+Increase in the IOPS and throughput may indicate sudden increase in database activity that may be caused by increased application load.
+
+3.	A high CPU consuming OS process can also cause this issue. Top CPU consuming processes can be viewed from OS process list (available from the console in the database Monitoring screen on the console).
+
+4.	A SQL that is using lot of resources (CPU/memory/IOPS) can also cause this issue. The top SQLs should be verified in the Performance Insights Top SQL screen.
+
+5.	A high number of idle connections can also take up CPU resources.
+   
+<br>Recommendations:
+1.	Tune the SQLs causing heavy activity in the system. Sometimes a simple index can reduce the overall IO activity and hence the CPU utilization.
+2.	Monitor idle connections. Implement client-side and server-side connection pooling (Amazon RDS Proxy) tools.
+3.	Upgrade the server to a larger instance to gain more CPUs.
+
+#### FreeableMemory
+Scenario: An Instance is Reported with Low Memory
+Symptom: CloudWatch metric FreeableMemory stays low for the period of observation.
+<br>Possible Causes:
+
+1.	Memory parameters are configured too high. Check non-default settings on these parameters:\
+•	shared_buffers\
+•	work_mem\
+•	maintenance_work_mem\
+•	autovacuum_work_mem\
+•	logical_decoding_work_mem
+
+2.	Too many idle connections. FreeableMemory stays flat at a low level consistently with low database load.
+
+3.	Large memory-consuming processes. FreeableMemory fluctuates with database workload changes. Investigate top OS processes/queries at specific time frames when FreeableMemory sharply declined.
+   
+<br>Recommendations:
+1.	Set shared_buffers at no more than 75% of the server memory; Set the other OS process memory parameters small to start with. Adjust them bit by bit to observe the server response.
+2.	Monitor idle connections. Implement client-side and server-side connection pooling (Amazon RDS Proxy) tools.
+3.	Identify the top memory-consuming processes and tune them.
+4.	Upgrade the server to a larger instance to gain more memory.
+
+#### BufferCachehitRatio 
+Scenario: An Instance is reported with Low Buffer Cache Hit Ratio
+Symptom: CloudWatch metric BufferCachehitRatio stays lower than the threshold defined during the period of observation.\
+<br>Possible Causes:
+1.	High amount of IOs matching the low value of this metric. Check the following values for the instance and the database parameters:\
+•	FreeableMemory metric\
+•	CPUUtilisation metric\
+•	shared_buffers – insufficient database parameter
+2.	Top SQLs by waits in the Performance Insights. Check a process/SQL that is using lot of memory resources or doing a lot of IO operation.
+3.	Large memory-consuming processes. FreeableMemory fluctuates with database workload changes. Investigate top OS processes/queries at specific time frames when FreeableMemory sharply declined.
+   
+<br>Recommendations:
+1.	Upgrade the server to a larger instance to gain more memory 
+2.	Tune top SQLs with large disk IOs.
+3.	Increase the value of shared_buffers parameter to assign more memory to the database instance for caching data.
+
+
 ## Cleanup
 You can clean up using this command:
 ```
