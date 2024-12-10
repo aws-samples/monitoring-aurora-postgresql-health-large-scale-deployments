@@ -13,7 +13,7 @@ type MetricConfig = {
 }
 
 const getCloudWatchMetric = async (db_instance_id: string, metricConfig: MetricConfig, startTime: Date, endTime: Date) => {
-    
+
     const cloudwatch = new CloudWatch();
     const statisticsFunction = await getStatisticsFunction(metricConfig.statistics);
     const data = await cloudwatch.getMetricStatistics({
@@ -45,14 +45,11 @@ const iterateLogs = async (numberOfHours: number, metricsTracked: MetricConfig[]
         endTime.setHours(startTime.getHours() + 1, 0, 0, 0);
         for (const instanceId of instanceIds) {
             for (const metric of metricsTracked) {
-                console.log(`Calculating ${metric.name} for ${instanceId} for ${startTime} and ${endTime}`);
                 const thresholdOperator = await getThresholdOperator(metric.statistics);
                 const dataPoints = await getCloudWatchMetric(instanceId, metric, startTime, endTime);
-                console.log(dataPoints);
                 for (const dataPoint of dataPoints) {
                     const data = (await getData(dataPoint, metric)).toFixed(2);
                     const expression = `${data}${thresholdOperator}${metric.threshold}`
-                    console.log(expression);
                     if (evaluate(expression)) {
                         const startTimeMs = startTime.getTime();
                         const startTimeEpoch = Math.floor(startTimeMs / 1000);
@@ -77,7 +74,7 @@ const getData = async (dataPoint: any, metric: MetricConfig) => {
     }
 }
 
-const getStatisticsFunction = async(statistics: string) => {
+const getStatisticsFunction = async (statistics: string) => {
     switch (statistics) {
         case 'Maximum':
             return Statistic.Maximum;
@@ -88,7 +85,7 @@ const getStatisticsFunction = async(statistics: string) => {
     }
 }
 
-const getThresholdOperator = async(statistics: string) => {
+const getThresholdOperator = async (statistics: string) => {
     switch (statistics) {
         case 'Maximum':
             return '>=';
@@ -97,10 +94,9 @@ const getThresholdOperator = async(statistics: string) => {
         default:
             throw new Error(`Unsupported statistics: ${statistics}`);
     }
-}   
+}
 
 const insertIntoDynamoDb = async (instanceId: string, metric: string, value: string, startTimeEpoch: number) => {
-    console.log(`Inserting into dynamodb ${instanceId} for ${metric} ${value} ${startTimeEpoch}`);
     const dynamodb = new DynamoDB();
     const putResult = dynamodb.putItem({
         TableName: process.env.DYNAMODB_TABLE_NAME,
@@ -122,6 +118,5 @@ export const iterateLogsOnASchedule: EventBridgeHandler<"Dynamo Entry", any, voi
     const command = new GetParameterCommand({ Name: process.env.METRICS_TRACKED });
     const response = await client.send(command);
     const metricsTracked: MetricConfig[] = JSON.parse(response.Parameter?.Value || '');
-    console.log(metricsTracked);
     await iterateLogs(numberOfHours, metricsTracked);
 }

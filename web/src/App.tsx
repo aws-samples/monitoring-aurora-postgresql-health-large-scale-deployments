@@ -5,7 +5,7 @@ import { Amplify } from 'aws-amplify';
 import { apiGatewayUrl as API_URL } from "../../server/api-url.json";
 
 const existingConfig = Amplify.getConfig();
-console.log("API_URL", API_URL)
+
 Amplify.configure({
   ...existingConfig,
   API: {

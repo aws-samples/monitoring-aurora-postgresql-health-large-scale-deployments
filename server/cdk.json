@@ -1,7 +1,9 @@
 {
   "app": "npx ts-node --prefer-ts-exts bin/app.ts",
   "watch": {
-    "include": ["**"],
+    "include": [
+      "**"
+    ],
     "exclude": [
       "README.md",
       "cdk*.json",
@@ -17,7 +19,10 @@
   "context": {
     "@aws-cdk/aws-lambda:recognizeLayerVersion": true,
     "@aws-cdk/core:checkSecretUsage": true,
-    "@aws-cdk/core:target-partitions": ["aws", "aws-cn"],
+    "@aws-cdk/core:target-partitions": [
+      "aws",
+      "aws-cn"
+    ],
     "@aws-cdk-containers/ecs-service-extensions:enableDefaultLogDriver": true,
     "@aws-cdk/aws-ec2:uniqueImdsv2TemplateName": true,
     "@aws-cdk/aws-ecs:arnFormatIncludesClusterName": true,
@@ -53,6 +58,27 @@
     "@aws-cdk/aws-efs:mountTargetOrderInsensitiveLogicalId": true,
     "@aws-cdk/aws-rds:auroraClusterChangeScopeOfInstanceParameterGroupWithEachParameters": true,
     "@aws-cdk/aws-appsync:useArnForSourceApiAssociationIdentifier": true,
-    "@aws-cdk/aws-rds:preventRenderingDeprecatedCredentials": true
+    "@aws-cdk/aws-rds:preventRenderingDeprecatedCredentials": true,
+    "scheduleDurationInHours": 1,
+    "metricsTracked": [
+      {
+        "name": "FreeableMemory",
+        "threshold": 2048000000,
+        "statistics": "Minimum"
+      },
+      {
+        "name": "BufferCacheHitRatio",
+        "threshold": 90,
+        "statistics": "Minimum",
+        "unit": "Percent"
+      },
+      {
+        "name": "CPUUtilization",
+        "threshold": 80,
+        "statistics": "Maximum",
+        "unit": "Percent"
+      }
+    ],
+    "docReference": "https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/Aurora.AuroraMonitoring.Metrics.html#Aurora.AuroraMySQL.Monitoring.Metrics.instances"
   }
 }

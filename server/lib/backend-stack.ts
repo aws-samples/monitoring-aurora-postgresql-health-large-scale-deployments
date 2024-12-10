@@ -74,6 +74,11 @@ export class BackendStack extends cdk.Stack {
       actions: ['execute-api:Invoke'],
       principals: [new AnyPrincipal()],
       resources: ['execute-api:/*/*/*'],
+      conditions: {
+        IpAddress: {
+          'aws:SourceIp': [this.sourceIp]
+        }
+      }
     });
 
     const apiResourcePolicy = new iam.PolicyDocument({
@@ -181,7 +186,7 @@ export class BackendStack extends cdk.Stack {
         actions: ['dynamodb:Query'],
         resources: [`${table.tableArn}/index/*`],
       }),
-    );    
+    );
     metricsTracked.grantRead(lambdaFunction);
     return lambdaFunction
   }
@@ -198,7 +203,7 @@ export class BackendStack extends cdk.Stack {
     // Add a local secondary index so that the query lambda can search data by date range
     dynamoDb.addLocalSecondaryIndex({
       indexName: secondaryIndexName,
-      sortKey: {name: 'DateHourTimeZone', type: cdk.aws_dynamodb.AttributeType.NUMBER},
+      sortKey: { name: 'DateHourTimeZone', type: cdk.aws_dynamodb.AttributeType.NUMBER },
       projectionType: cdk.aws_dynamodb.ProjectionType.ALL
     });
     return dynamoDb;

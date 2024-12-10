@@ -14,7 +14,6 @@ const CloudWatcher = ({ setHelpPanel }: ICloudWatcherProps) => {
 
     const [selectedMetricName, setSelectedMetricName] = useState<string | undefined>(undefined);
     const [dateRangeFilter, setDateRangeFilter] = useState<DateRangePickerProps.Value>(DEFAULT_DATE_FILTER);
-    console.log("selectedMetricName", selectedMetricName);
     return (
         <ContentLayout>
             {selectedMetricName && <Button iconName="arrow-left" variant="icon" onClick={() => setSelectedMetricName(undefined)} />}
