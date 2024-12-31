@@ -16,6 +16,9 @@ In this project, we automated and streamlined the monitoring tasks for large-sca
 ## Solution Architecture
 ![sa](./images/sol-arch.png)
 
+## Data Flow 
+![sa](./images/data-flow.png)
+
 ## Deployment
 
 ### Prerequisites
