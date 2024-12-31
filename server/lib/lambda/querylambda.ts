@@ -15,7 +15,6 @@ async function getMetricsTracked() {
 }
 
 const queryTableByMetricsName = async (metricName: string, startTimeEpoch: string, endTimeEpoch: string, count: boolean) => {
-    console.log(metricName, startTimeEpoch, endTimeEpoch);
     if (!metricName || !process.env.DYNAMODB_TABLE_NAME || !startTimeEpoch || !endTimeEpoch || !process.env.DYNAMODB_INDEX_NAME) {
         throw new Error('Missing required parameters');
     }
@@ -89,11 +88,10 @@ export const handler = async (event: APIGatewayEvent) => {
                 }
         }
     } catch (error) {
-        console.error('Error:', error);
         return {
             statusCode: 500,
             body: JSON.stringify({
-                message: JSON.stringify(error)
+                message: JSON.stringify({ message: 'An internal server error occurred' })
             }),
             headers: {
                 "Access-Control-Allow-Headers": "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent",

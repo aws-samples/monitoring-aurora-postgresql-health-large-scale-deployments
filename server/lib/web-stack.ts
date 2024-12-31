@@ -1,7 +1,7 @@
 import * as cdk from 'aws-cdk-lib';
 import { Distribution, ViewerProtocolPolicy } from "aws-cdk-lib/aws-cloudfront";
 import { S3Origin } from "aws-cdk-lib/aws-cloudfront-origins";
-import { BlockPublicAccess, Bucket } from "aws-cdk-lib/aws-s3";
+import { BlockPublicAccess, Bucket, BucketEncryption } from "aws-cdk-lib/aws-s3";
 import { BucketDeployment, Source } from "aws-cdk-lib/aws-s3-deployment";
 import { Construct } from 'constructs';
 
@@ -15,6 +15,8 @@ export default class WebStack extends cdk.Stack {
     hostingBucket = new Bucket(this, 'WebBucket', {
         autoDeleteObjects: true,
         blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
+        versioned: true, // Enable versioning
+        encryption: BucketEncryption.S3_MANAGED, // Use S3-managed encryption
         removalPolicy: cdk.RemovalPolicy.DESTROY,
         enforceSSL: true
     })

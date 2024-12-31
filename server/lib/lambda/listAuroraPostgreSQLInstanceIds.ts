@@ -19,7 +19,7 @@ export async function listAuroraPostgreSQLInstanceIds(): Promise<string[]> {
         );
         return instanceIds;
     } catch (error) {
-        console.error("Error:", error);
+        console.error("Error:", "ERROR GENERATING AURORA POSTGRESSQL IDS");
         return [];
     }
 }
